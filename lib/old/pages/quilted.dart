@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:test_project/common.dart';
+import 'package:test_project/old/common.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+
+
+import 'package:flutter/material.dart';
+import 'package:test_project/old/common.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
@@ -8,18 +14,14 @@ class QuiltedPage extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-
-
-
-
   static const pattern = [
     QuiltedGridTile(2, 2),
-    QuiltedGridTile(1, 1),
-    QuiltedGridTile(1, 1),
-    QuiltedGridTile(1, 1),
-    QuiltedGridTile(1, 1),
-    QuiltedGridTile(1, 1),
-    QuiltedGridTile(1, 3),
+    QuiltedGridTile(4, 2),
+    QuiltedGridTile(2, 2),
+    QuiltedGridTile(2, 4),
+    QuiltedGridTile(2, 2),
+    QuiltedGridTile(2, 2),
+    QuiltedGridTile(2, 4)
   ];
 
   @override
@@ -28,10 +30,10 @@ class QuiltedPage extends StatelessWidget {
       title: 'QuiltedTest',
       child: GridView.custom(
         gridDelegate: SliverQuiltedGridDelegate(
-          crossAxisCount: 3,
+          crossAxisCount: 4,
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
-          repeatPattern: QuiltedGridRepeatPattern.mirrored,
+          repeatPattern: QuiltedGridRepeatPattern.same,
           pattern: pattern,
         ),
         childrenDelegate: SliverChildBuilderDelegate(
@@ -39,8 +41,8 @@ class QuiltedPage extends StatelessWidget {
             color: Colors.cyanAccent,
             child: Text("$index"),
           ),
-          childCount: 7,
-      ),
+          childCount: 14,
+        ),
       ),
     );
   }

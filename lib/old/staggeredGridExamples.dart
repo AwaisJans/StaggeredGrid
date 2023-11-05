@@ -1,14 +1,14 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:test_project/common.dart';
+import 'package:test_project/old/common.dart';
 
-import 'package:test_project/pages/aligned.dart';
-import 'package:test_project/pages/masonry.dart';
-import 'package:test_project/pages/quilted.dart';
-import 'package:test_project/pages/staggered.dart';
-import 'package:test_project/pages/staired.dart';
-import 'package:test_project/pages/woven.dart';
+import 'package:test_project/old/pages/aligned.dart';
+import 'package:test_project/old/pages/masonry.dart';
+import 'package:test_project/old/pages/quilted.dart';
+import 'package:test_project/old/pages/staggered.dart';
+import 'package:test_project/old/pages/staired.dart';
+import 'package:test_project/old/pages/woven.dart';
 
 void main() {
   runApp(const MyApp());

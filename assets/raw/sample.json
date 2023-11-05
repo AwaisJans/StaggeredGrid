@@ -1,0 +1,42 @@
+[
+  {
+    "title":"India",
+    "text":"New Delhi",
+    "img": "assets/images/face1.jpg"
+  },
+  {
+    "title":"Australia",
+    "text":"Canberra",
+    "img": "assets/images/face1.jpg"
+  },
+  {
+    "title":"England",
+    "text":"London",
+    "img": "assets/images/face1.jpg"
+  },
+  {
+    "title":"France",
+    "text":"Paris",
+    "img": "assets/images/face1.jpg"
+  },
+  {
+    "title":"Germany",
+    "text":"Berlin",
+    "img": "assets/images/face1.jpg"
+  },
+  {
+    "title":"Italy",
+    "text":"Rome",
+    "img": "assets/images/face1.jpg"
+  },
+  {
+    "title":"Switzerland",
+    "text":"Bern",
+    "img": "assets/images/face1.jpg"
+  },
+  {
+    "title":"Singapore",
+    "text":"Singapore",
+    "img": "assets/images/face1.jpg"
+  }
+]
