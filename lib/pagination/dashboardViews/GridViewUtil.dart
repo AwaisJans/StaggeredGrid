@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:test_project/pagination/configs/default_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import 'package:test_project/pagination/dashboard_items.dart';
@@ -119,12 +118,11 @@ class _MyGridViewState extends State<MyGridView> {
                       );
                     }
                     else{
-                      Fluttertoast.showToast(msg: snapshot.data!.dashboard![index].title ,
-                          toastLength: Toast.LENGTH_SHORT, gravity: ToastGravity.CENTER);
 
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(snapshot.data!.dashboard![index].title),
+                      ));
                     }
-
-
 
 
                   },

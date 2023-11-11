@@ -8,6 +8,8 @@ class Assets {
   static const String assetsStaggered = 'assets/staggered.png';
   static const String assetsStaired = 'assets/staired.png';
   static const String assetsWoven = 'assets/woven.png';
+  static const String drawableDashboardModules = 'drawable/dashboard_modules.json';
+  static const String htmlExample = 'assets/html/example.html';
   static const String imagesExampleA = 'assets/images/example_a.png';
   static const String imagesFace1 = 'assets/images/face1.jpg';
   static const String imagesFlower1 = 'assets/images/flower-1.jpeg';
@@ -19,6 +21,7 @@ class Assets {
   static const String imagesFlower7 = 'assets/images/flower-7.jpeg';
   static const String imagesSetting = 'assets/images/setting.png';
   static const String imagesSetting1 = 'assets/images/setting1.svg';
+  static const String javascriptInjectScript = 'assets/javascript/inject_script.js';
   static const String rawDashboardModules = 'assets/raw/dashboard_modules.json';
   static const String rawNewsModules = 'assets/raw/news_modules.json';
   static const String rawSample = 'assets/raw/sample.json';

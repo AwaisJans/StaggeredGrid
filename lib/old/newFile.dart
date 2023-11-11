@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:boxy/boxy.dart';
 import 'package:boxy/flex.dart';
 import 'package:boxy/padding.dart';

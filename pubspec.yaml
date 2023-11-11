@@ -40,8 +40,9 @@ dependencies:
   intl: ^0.18.1
   flutter_staggered_grid_view: ^0.7.0
   weather_icons: ^3.0.0
-  fluttertoast: ^8.0.8
   boxy: ^2.1.2
+  flutter_inappwebview: ^6.0.0-beta.25
+  url_launcher: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +71,8 @@ flutter:
     - assets/raw/
     - assets/images/
     - drawable/
+    - assets/javascript/
+    - assets/html/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

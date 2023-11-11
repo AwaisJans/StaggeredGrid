@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:weather_icons/weather_icons.dart';
@@ -84,11 +83,9 @@ class _HomePageState extends State<HomePage> {
 
                   child: GestureDetector(
                     onTap: () {
-                      Fluttertoast.showToast(
-                        msg: "setting",
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.CENTER,
-                      );
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("setting"),
+                      ));
                     }, // Image tapped
                     child: SvgPicture.asset(
                       'assets/images/setting1.svg',

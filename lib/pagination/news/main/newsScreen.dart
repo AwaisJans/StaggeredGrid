@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:test_project/pagination/dashboard_items.dart';
 import 'package:test_project/pagination/news/news_items.dart';
 
@@ -49,75 +48,6 @@ class LoadMoreOnScrollListView extends StatefulWidget {
 }
 
 
-class _LoadMoreOnScrollListViewState extends State<LoadMoreOnScrollListView> {
-
-
-  final Dashboard dashboardSingleFetchItem;
-
-  _LoadMoreOnScrollListViewState(this.dashboardSingleFetchItem);
-
-
-  int totalItems = 20; // Total items available
-  int threshold = 2; // Threshold for the end of the list
-  List<String> items = List.generate(20, (index) => 'Item $index'); // Sample items list
-  ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-      // Reached the end of the list, load more items
-      loadMore();
-    }
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(dashboardSingleFetchItem.url.toString()),
-      ),
-      body: ListView.builder(
-        itemCount: items.length + 1, // +1 for the loading indicator
-        controller: _scrollController,
-        itemBuilder: (context, index) {
-          if (index == items.length) {
-            return Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Center(
-                child: CircularProgressIndicator(), // Loading indicator
-              ),
-            );
-          }
-          return ListTile(
-            title: Text(items[index]),
-          );
-        },
-      ),
-    );
-  }
-  void loadMore() {
-    // Simulating the addition of new items
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        final newItems = List.generate(10, (index) => 'New Item ${items.length + index}');
-        items.addAll(newItems);
-      });
-    });
-  }
-}
 
 
 class _LoadMoreNewsState extends State<LoadMoreOnScrollListView> {
@@ -243,7 +173,9 @@ class _LoadMoreNewsState extends State<LoadMoreOnScrollListView> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => newsDetail()),
+                            MaterialPageRoute(builder: (context) => newsDetail(
+                                newsSingleFetchItem : snapshot.data!.news![index]
+                            )),
                           );
                         },
                         child: Card(
