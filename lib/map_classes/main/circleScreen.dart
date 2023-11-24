@@ -13,32 +13,11 @@ class _CircleMapScreenState extends State<CircleMapScreen> {
 
   LatLng loc1 = const LatLng(34.022723637768, 71.52425824981451);
   LatLng loc2 = const LatLng(34.2329048623674, 71.5378010904082);
+  LatLng loc3 = const LatLng(33.9203419727611, 71.4692384490439);
 
-  Set<Polyline> polylines={};
 
-  @override
-  void initState() {
-    drawPolylines();
-    super.initState();
-  }
-
-  drawPolylines() async {
-    polylines.add(Polyline(
-      polylineId: PolylineId(loc1.toString()),
-      visible: true,
-      width: 5, //width of polyline
-      points: [
-        loc1, //start point
-        loc2, //end point
-      ],
-      color: Colors.deepPurpleAccent, //color of polyline
-    ));
-
-    setState(() {
-      //refresh UI
-    });
-  }
-
+  final Set<Marker> _markers = {};
+  final Set<Circle> _circles = {};
 
 
   @override
@@ -54,18 +33,75 @@ class _CircleMapScreenState extends State<CircleMapScreen> {
           target: loc1, //initial position
           zoom: 10.0, //initial zoom level
         ),
-        polylines: polylines, //polylines list
-        mapType: MapType.normal, //map type
-        onMapCreated: (controller) { //method called when map is created
-          setState(() {
-            mapController = controller;
-          });
-        },
+        onMapCreated: _onMapCreated,
+        circles: _circles,
       )
     );
   }
 
 
+  void _onMapCreated(GoogleMapController controller) {
+    setState(() {
+      mapController = controller;
+      _addCircles();
 
+    });
+  }
+
+
+  void _addCircles() {
+    List<LatLng> coordinates = [
+      loc1,
+      loc2,
+      loc3,
+      // Add more coordinates as needed
+    ];
+
+    for (LatLng coordinate in coordinates) {
+      _addCircle(coordinate);
+    }
+  }
+
+  void _addCircle(LatLng center) {
+    final CircleId circleId = CircleId(center.toString());
+
+    final Circle circle = Circle(
+        circleId: circleId,
+        center: center,
+        radius: 5000,
+        // Radius in meters
+        strokeWidth: 5,
+        strokeColor: Colors.red,
+        fillColor: Colors.red.withOpacity(0.3),
+        consumeTapEvents: true,
+        onTap: () {
+
+
+          if (center.toString() == loc1.toString()){
+            // Handle tap on the circle
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Peshawar'),
+            ));
+          }
+          else if (center.toString() == loc2.toString()){
+            // Handle tap on the circle
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Shabqadar'),
+            ));
+          }
+          else if (center.toString() == loc3.toString()){
+            // Handle tap on the circle
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Bara'),
+            ));
+          }
+
+        },
+      );
+
+    setState(() {
+      _circles.add(circle);
+    });
+  }
 
 }

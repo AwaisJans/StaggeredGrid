@@ -37,24 +37,26 @@ dependencies:
   cupertino_icons: ^1.0.2
   http: ^1.1.0
   flutter_svg: ^2.0.5
-  intl: ^0.18.1
+  intl: ^0.17.0
   flutter_staggered_grid_view: ^0.7.0
   weather_icons: ^3.0.0
   boxy: ^2.1.2
-
+  vcard_maintained: ^0.0.1+1
   webview_flutter: ^4.4.2
   webview_flutter_wkwebview: ^3.9.4
   webview_flutter_android: ^3.12.1
-
-
-  flutter_inappwebview: ^6.0.0-beta.25
   url_launcher: ^6.2.1
+  flutter_inappwebview: ^6.0.0-beta.25
   google_maps_flutter: ^2.5.0
   dio: ^5.3.3
-
+  contacts_service: ^0.6.3
+  geolocator: ^9.0.2
   flutter_polyline_points: ^2.0.0
-
-
+  photo_view: ^0.14.0 # Use the latest version available
+  cached_network_image: ^3.0.0 # Use the latest version available
+  google_maps_flutter_platform_interface: ^2.1.0
+  google_maps_cluster_manager: ^3.0.0+1
+  insta_image_viewer: ^1.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

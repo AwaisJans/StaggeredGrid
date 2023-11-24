@@ -8,6 +8,7 @@ class AppConfig {
 
 
   static int get newsID => 3;
+  static int get ferminID => 4;
 
   static double get newsCardLeftMargin => 15;
   static double get newsCardRightMargin => 15;
@@ -19,5 +20,10 @@ class AppConfig {
     return url;
   }
 
+
+  static String ferminUrlItems(String baseUrl, int limitStart, int limitItems) {
+    String url = "$baseUrl&action=getFirmaItems&limitStart=$limitStart&limitAmount=$limitItems";
+    return url;
+  }
 
 }

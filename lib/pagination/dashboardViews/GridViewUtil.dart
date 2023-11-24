@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import 'package:test_project/pagination/dashboard_items.dart';
+import 'package:test_project/pagination/fermin/main/ferminScreen.dart';
 import 'package:test_project/pagination/news/main/newsScreen.dart';
 
 import '../configs/app_config.dart';
@@ -102,21 +103,26 @@ class _MyGridViewState extends State<MyGridView> {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
-                   // Fluttertoast.showToast(msg: snapshot.data!.dashboard![index].title , toastLength: Toast.LENGTH_SHORT, gravity: ToastGravity.CENTER);
-
                     if (snapshot.data!.dashboard![index].id == AppConfig.newsID) {
-
-
-
-
-    // navigate to the desired route
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => newsApp(
-    dashboardSingleFetchItem : snapshot.data!.dashboard![index]
-    )),
+                                  dashboardSingleFetchItem:
+                                  snapshot.data!.dashboard![index])),
+                        );
+                    }
+
+                    else if (snapshot.data!.dashboard![index].id == AppConfig.ferminID) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ferminListView(
+                            dashboardSingleFetchItem:
+                            snapshot.data!.dashboard![index])),
                       );
                     }
+
+
+
                     else{
 
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

@@ -25,128 +25,129 @@ class _ButtonsMainScreenState extends State<ButtonsMainScreen> {
         title: Text('Map Example'),
         backgroundColor: Colors.black,
       ),
-      body:
-      Center(
-        child:  Column(
+      body: Column(
           mainAxisAlignment: MainAxisAlignment.center, // Center the buttons
-
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.all(8.0),
-                    width: 280,
-                    height: 70,
-                    color: Colors.black,
-                    child:ElevatedButton(
 
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => PolygonMapScreen()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.black, // Change the background color here
-                      ),
-                      child: const Text('Line Polygon Example',
-                      style: TextStyle(
-                          fontSize: 18
-                      ),
+            Center(
+              child:Padding(
+                padding: const EdgeInsets.all(8.0),
+                child:
+
+                Column(
+                  children: [
+
+                    Container(
+                      margin: const EdgeInsets.all(8.0),
+                      width: 280,
+                      height: 70,
+                      color: Colors.black,
+                      child:ElevatedButton(
+
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => PolygonMapScreen()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.black, // Change the background color here
+                        ),
+                        child: const Text('Line Polygon Example',
+                          style: TextStyle(
+                              fontSize: 18
+                          ),
+                        ),
                       ),
                     ),
-                  ),
 
 
-                  Container(
-                    margin: const EdgeInsets.all(8.0),
-                    width: 280,
-                    height: 70,
-                    color: Colors.black,
-                    child:ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => CircleMapScreen()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.black, // Change the background color here
+                    Container(
+                      margin: const EdgeInsets.all(8.0),
+                      width: 280,
+                      height: 70,
+                      color: Colors.black,
+                      child:ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => CircleMapScreen()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.black, // Change the background color here
+                        ),
+                        child: const Text('Circle on Map Example',
+                          style: TextStyle(
+                              fontSize: 18
+                          ),),
                       ),
-                      child: const Text('Circle on Map Example',
-                        style: TextStyle(
-                            fontSize: 18
-                        ),),
                     ),
-                  ),
 
-                  Container(
-                    margin: const EdgeInsets.all(8.0),
-                    width: 280,
-                    height: 70,
-                    color: Colors.black,
-                    child:ElevatedButton(
-                      onPressed: () {
+                    Container(
+                      margin: const EdgeInsets.all(8.0),
+                      width: 280,
+                      height: 70,
+                      color: Colors.black,
+                      child:ElevatedButton(
+                        onPressed: () {
 
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.black, // Change the background color here
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.black, // Change the background color here
+                        ),
+                        child: const Text('Rectangle on Map Example',
+                          style: TextStyle(
+                              fontSize: 18
+                          ),),
                       ),
-                      child: const Text('Rectangle on Map Example',
-                        style: TextStyle(
-                            fontSize: 18
-                        ),),
                     ),
-                  ),
 
 
 
-                  Container(
-                    margin: const EdgeInsets.all(8.0),
-                    width: 280,
-                    height: 70,
-                    color: Colors.black,
-                    child:ElevatedButton(
-                      onPressed: () {
+                    Container(
+                      margin: const EdgeInsets.all(8.0),
+                      width: 280,
+                      height: 70,
+                      color: Colors.black,
+                      child:ElevatedButton(
+                        onPressed: () {
 
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.black, // Change the background color here
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.black, // Change the background color here
+                        ),
+                        child: const Text('Clusters Example',
+                          style: TextStyle(
+                              fontSize: 18
+                          ),),
                       ),
-                      child: const Text('Clustera Example',
-                        style: TextStyle(
-                            fontSize: 18
-                        ),),
                     ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.all(8.0),
-                    width: 280,
-                    height: 70,
-                    color: Colors.black,
-                    child:ElevatedButton(
-                      onPressed: () {
+                    Container(
+                      margin: const EdgeInsets.all(8.0),
+                      width: 280,
+                      height: 70,
+                      color: Colors.black,
+                      child:ElevatedButton(
+                        onPressed: () {
 
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.black, // Change the background color here
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.black, // Change the background color here
+                        ),
+                        child: const Text('All in One Example',
+                          style: TextStyle(
+                              fontSize: 18
+                          ),),
                       ),
-                      child: const Text('All in One Example',
-                        style: TextStyle(
-                            fontSize: 18
-                        ),),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
+
           ],
         ),
-      ),
-
-
     );
   }
 }

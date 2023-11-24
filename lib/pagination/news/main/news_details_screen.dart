@@ -16,6 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:insta_image_viewer/insta_image_viewer.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
@@ -135,11 +136,18 @@ class _CustomLayoutWebViewState extends State<CustomLayoutWebView> {
       onNavigationRequest: (NavigationRequest request) {
         if (request.url.contains('showpic')) {
           debugPrint('blocking navigation to ${request.url}');
-          Navigator.push(
-            context,
-            // MaterialPageRoute(builder: (context) => MyImageScreen(request.url)),
-            MaterialPageRoute(builder: (context) => MyImageScreen()),
+
+          SizedBox(
+            width: 100,
+            height: 140,
+            child: InstaImageViewer(
+              child: Image(
+                image: Image.network(request.url)
+                    .image,
+              ),
+            ),
           );
+
           return NavigationDecision.prevent;
         }
         debugPrint('allowing navigation to ${request.url}');
