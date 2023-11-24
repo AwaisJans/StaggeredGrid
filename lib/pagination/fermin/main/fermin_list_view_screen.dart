@@ -28,28 +28,6 @@ class _MyFerminListViewState extends State<MyFerminListView> {
     'Painting',
   ];
 
-
-
-
-  Future<FerminItems> fetchAlbum() async {
-
-    final response = await http.get(Uri.parse("https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaItems&"
-        "limitStart=0&limitAmount=10"));
-
-    if (response.statusCode == 200) {
-
-      return FerminItems.fromJson(
-          jsonDecode(response.body) as Map<String, dynamic>);
-    } else {
-
-      throw Exception('Failed to load album');
-    }
-  }
-
-
-
-
-
   ScrollController scrollController = ScrollController();
 
   bool isLoadingMore = false;
@@ -69,8 +47,6 @@ class _MyFerminListViewState extends State<MyFerminListView> {
 
     final response = await http.get(Uri.parse("https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaItems&"
         "limitStart=$_startLimit&limitAmount=$_limit"));
-
-
 
     FerminItems newsItemsClass = FerminItems.fromJson(
         jsonDecode(response.body) as Map<String, dynamic>);
