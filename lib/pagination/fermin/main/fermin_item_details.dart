@@ -5,13 +5,16 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:insta_image_viewer/insta_image_viewer.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../news/main/image_picker_view.dart';
 import '../model/ferminListViewModel/fermin_items.dart';
+
 
 class ferminItemDetails extends StatefulWidget {
   final Fermin ferminSingleFetchItem;
@@ -35,22 +38,10 @@ class _ferminItemDetailsState extends State<ferminItemDetails> {
     'Painting',
   ];
 
-
-
-
-
-
-
-
   WebViewController controller = WebViewController();
-
 
   late double webViewHeight = 300.0; // Initial height
   late double webViewHeadingHeight = 30; // Initial height
-
-
-
-
 // Inject JavaScript code to calculate the content height
   String script = """
                                 var height = Math.max( document.body.scrollHeight, document.body.offsetHeight, 
@@ -81,16 +72,11 @@ class _ferminItemDetailsState extends State<ferminItemDetails> {
                                   }
                               """;
 
-
-
   @override
   void initState() {
     String? htmlContent = ferminSingleFetchItem.beschreibung.toString();
-
     super.initState();
     controller;
-
-
     if(htmlContent.isEmpty){
       webViewHeight = 0;
       webViewHeadingHeight = 0;
@@ -184,6 +170,7 @@ class _ferminItemDetailsState extends State<ferminItemDetails> {
 
     return heightWebView;
   }
+
 
 
 
@@ -311,8 +298,6 @@ class _ferminItemDetailsState extends State<ferminItemDetails> {
                   ),
 
                     ),
-
-
 
                   InkWell(
                     onTap: () {
@@ -476,47 +461,54 @@ class _ferminItemDetailsState extends State<ferminItemDetails> {
                   child:
                   GestureDetector(
                     onTap: () {
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CommonExampleRouteWrapper(
-                            imageProvider: const NetworkImage(
-                              "https://www.welzheim.de//fileadmin//user_upload//firmenliste_4bb6d5dbd782068b8d5f9aa839ad91c9.png",
-                            ),
-                            loadingBuilder: (context, event) {
-                              if (event == null) {
-                                return const Center(
-                                  child: Text("Loading"),
-                                );
-                              }
-
-                              final value = event.cumulativeBytesLoaded /
-                                  (event.expectedTotalBytes ??
-                                      event.cumulativeBytesLoaded);
-
-                              final percentage = (100 * value).floor();
-                              return Center(
-                                child: Text("$percentage%"),
-                              );
-                            },
-                          ),
-                        ),
-                      );
                     },
                     child:
-                    SizedBox(
-                      width: 100,
-                      height: 140,
-                      child: InstaImageViewer(
-                        child: Image(
-                          image: Image.network("https://www.welzheim.de//fileadmin//user_upload//firmenliste_4bb6d5dbd782068b8d5f9aa839ad91c9.png")
-                              .image,
+                    // SizedBox(
+                    //   width: 100,
+                    //   height: 140,
+                    //   child: InstaImageViewer(
+                    //     child: Image(
+                    //       image: Image.network("https://www.welzheim.de//fileadmin//user_upload//firmenliste_4bb6d5dbd782068b8d5f9aa839ad91c9.png")
+                    //           .image,
+                    //     ),
+                    //   ),
+                    // ),
+
+
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            GalleryExampleItemThumbnail(
+                              galleryExampleItem: galleryItems[0],
+                              onTap: () {
+                                open(context, 0);
+                              },
+                            ),
+                            GalleryExampleItemThumbnail(
+                              galleryExampleItem: galleryItems[1],
+                              onTap: () {
+                                open(context, 1);
+                              },
+                            ),
+                            GalleryExampleItemThumbnail(
+                              galleryExampleItem: galleryItems[2],
+                              onTap: () {
+                                open(context, 2);
+                              },
+                            ),
+                          ],
                         ),
-                      ),
+                      ],
                     ),
-                  )
-                ),
+                  ),
+
+
+
+                  ),
+
                 /// WebView
                 Container(
                   margin: const EdgeInsets.fromLTRB(5, 10, 10, 10),
@@ -555,51 +547,177 @@ class _ferminItemDetailsState extends State<ferminItemDetails> {
 
 }
 
-class CommonExampleRouteWrapper extends StatelessWidget {
-  const CommonExampleRouteWrapper({
-    this.imageProvider,
+
+
+class GalleryExampleItem {
+  GalleryExampleItem({
+    required this.id,
+    required this.resource,
+    this.isSvg = false,
+  });
+
+  final String id;
+  final String resource;
+  final bool isSvg;
+}
+
+class GalleryExampleItemThumbnail extends StatelessWidget {
+  const GalleryExampleItemThumbnail({
+    Key? key,
+    required this.galleryExampleItem,
+    required this.onTap,
+  }) : super(key: key);
+
+  final GalleryExampleItem galleryExampleItem;
+
+  final GestureTapCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Hero(
+          tag: galleryExampleItem.id,
+          child: Image.asset(galleryExampleItem.resource, height: 80.0),
+        ),
+      ),
+    );
+  }
+}
+
+List<GalleryExampleItem> galleryItems = <GalleryExampleItem>[
+  GalleryExampleItem(
+    id: "tag1",
+    resource: "assets/images/flower-1.jpeg",
+  ),
+  GalleryExampleItem(
+    id: "tag3",
+    resource: "assets/images/flower-2.jpeg",
+  ),
+  GalleryExampleItem(
+    id: "tag4",
+    resource: "assets/images/flower-3.jpeg",
+  ),
+];
+
+
+
+void open(BuildContext context, final int index) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => GalleryPhotoViewWrapper(
+        galleryItems: galleryItems,
+        backgroundDecoration: const BoxDecoration(
+          color: Colors.black,
+        ),
+        initialIndex: index,
+        scrollDirection:  Axis.horizontal,
+      ),
+    ),
+  );
+}
+
+
+class GalleryPhotoViewWrapper extends StatefulWidget {
+  GalleryPhotoViewWrapper({
     this.loadingBuilder,
     this.backgroundDecoration,
     this.minScale,
     this.maxScale,
-    this.initialScale,
-    this.basePosition = Alignment.center,
-    this.filterQuality = FilterQuality.none,
-    this.disableGestures,
-    this.errorBuilder,
-  });
+    this.initialIndex = 0,
+    required this.galleryItems,
+    this.scrollDirection = Axis.horizontal,
+  }) : pageController = PageController(initialPage: initialIndex);
 
-  final ImageProvider? imageProvider;
   final LoadingBuilder? loadingBuilder;
   final BoxDecoration? backgroundDecoration;
   final dynamic minScale;
   final dynamic maxScale;
-  final dynamic initialScale;
-  final Alignment basePosition;
-  final FilterQuality filterQuality;
-  final bool? disableGestures;
-  final ImageErrorWidgetBuilder? errorBuilder;
+  final int initialIndex;
+  final PageController pageController;
+  final List<GalleryExampleItem> galleryItems;
+  final Axis scrollDirection;
+
+  @override
+  State<StatefulWidget> createState() {
+    return _GalleryPhotoViewWrapperState();
+  }
+}
+
+class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper> {
+  late int currentIndex = widget.initialIndex;
+
+  void onPageChanged(int index) {
+    setState(() {
+      currentIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        decoration: widget.backgroundDecoration,
         constraints: BoxConstraints.expand(
           height: MediaQuery.of(context).size.height,
         ),
-        child: PhotoView(
-          imageProvider: imageProvider,
-          loadingBuilder: loadingBuilder,
-          backgroundDecoration: backgroundDecoration,
-          minScale: minScale,
-          maxScale: maxScale,
-          initialScale: initialScale,
-          basePosition: basePosition,
-          filterQuality: filterQuality,
-          disableGestures: disableGestures,
-          errorBuilder: errorBuilder,
+        child: Stack(
+          alignment: Alignment.bottomRight,
+          children: <Widget>[
+            PhotoViewGallery.builder(
+              scrollPhysics: const BouncingScrollPhysics(),
+              builder: _buildItem,
+              itemCount: widget.galleryItems.length,
+              loadingBuilder: widget.loadingBuilder,
+              backgroundDecoration: widget.backgroundDecoration,
+              pageController: widget.pageController,
+              onPageChanged: onPageChanged,
+              scrollDirection: widget.scrollDirection,
+            ),
+            Container(
+              padding: const EdgeInsets.all(20.0),
+              child: Text(
+                "Image ${currentIndex + 1}",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17.0,
+                  decoration: null,
+                ),
+              ),
+            )
+          ],
         ),
       ),
+    );
+  }
+
+  PhotoViewGalleryPageOptions _buildItem(BuildContext context, int index) {
+    final GalleryExampleItem item = widget.galleryItems[index];
+    return item.isSvg
+        ? PhotoViewGalleryPageOptions.customChild(
+      child: Container(
+        width: 300,
+        height: 300,
+        child: SvgPicture.asset(
+          item.resource,
+          height: 200.0,
+        ),
+      ),
+      childSize: const Size(300, 300),
+      initialScale: PhotoViewComputedScale.contained,
+      minScale: PhotoViewComputedScale.contained * (0.5 + index / 10),
+      maxScale: PhotoViewComputedScale.covered * 4.1,
+      heroAttributes: PhotoViewHeroAttributes(tag: item.id),
+    )
+        : PhotoViewGalleryPageOptions(
+      imageProvider: AssetImage(item.resource),
+      initialScale: PhotoViewComputedScale.contained,
+      minScale: PhotoViewComputedScale.contained * (0.5 + index / 10),
+      maxScale: PhotoViewComputedScale.covered * 4.1,
+      heroAttributes: PhotoViewHeroAttributes(tag: item.id),
     );
   }
 }
