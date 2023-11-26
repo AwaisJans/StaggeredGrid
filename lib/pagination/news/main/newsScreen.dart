@@ -50,23 +50,53 @@ class _LoadMoreNewsState extends State<LoadMoreOnScrollListView> {
 
   bool isLoadingMore = false;
   int _limit = 10;
-  int _startLimit = 0;
+  late int _startLimit = 0;
 
   bool noMoreItems = false;
 
   List<News> newsItemsArray = [];
 
-  void fetchData(startLimit) async {
+  late String urlKategory = "";
+
+  String apiUrl = "";
+
+  Future<void> performAsyncOperation() async {
+    // Simulate an asynchronous operation
+    await Future.delayed(Duration(seconds: 2));
+
+    isFilterActivated = true;
+  }
+  void fetchData() async {
     setState(() {
       isLoadingMore = true;
+
+      print("checkingFilterStatusASYNC${isFilterActivated.toString()}");
+
+
+
     });
 
     var beforeCount = newsItemsArray.length;
 
-    final response = await http.get(Uri.parse(AppConfig.newsUrlItems(
-        dashboardSingleFetchItem.url.toString(), startLimit, _limit)));
 
-    log("theNewersURl ${AppConfig.newsUrlItems(dashboardSingleFetchItem.url.toString(), startLimit, _limit)}");
+    if (isFilterActivated){
+      String filterBaseUrl = "https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14";
+      setState(() {
+        apiUrl = "$filterBaseUrl&action=getNewsItems$urlKategory&volltext=$enteredText"
+            "&limitStart=$_startLimit&limitAmount=$_limit";
+      });
+
+    }
+    else{
+      setState(() {
+        apiUrl = AppConfig.newsUrlItems(dashboardSingleFetchItem.url.toString(), _startLimit, _limit);
+      });
+    }
+
+    final response = await http.get(Uri.parse(apiUrl));
+
+    log("theNewersURl ${AppConfig.newsUrlItems(dashboardSingleFetchItem.url.toString(), _startLimit, _limit)}");
+    print("checkingFilterStatusASYNC${isFilterActivated.toString()}");
 
     NewsItems newsItemsClass =
         NewsItems.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
@@ -92,21 +122,10 @@ class _LoadMoreNewsState extends State<LoadMoreOnScrollListView> {
   @override
   void initState() {
     super.initState();
-    fetchData(_startLimit);
+    fetchData();
     fetchFilterData();
     handleNext();
-
-
-    // Set a delay of 3 seconds before updating the state
-    Future.delayed(Duration(seconds: 3), () {
-      setState(() {
-        // Toggle the visibility of the Filters after 3 seconds
-        allFalse = !allFalse;
-      });
-    });
-
   }
-  bool allFalse = false;
 
   void handleNext() {
     scrollController.addListener(() async {
@@ -115,7 +134,7 @@ class _LoadMoreNewsState extends State<LoadMoreOnScrollListView> {
           scrollController.position.pixels) {
         log("handleNext $_startLimit");
 
-        fetchData(_startLimit);
+        fetchData();
       }
     });
   }
@@ -159,6 +178,10 @@ class _LoadMoreNewsState extends State<LoadMoreOnScrollListView> {
 
   TextEditingController textEditingController = TextEditingController();
 
+  String enteredText = "";
+
+  bool isFilterActivated = false;
+
   @override
   void dispose() {
     textEditingController.dispose();
@@ -166,13 +189,49 @@ class _LoadMoreNewsState extends State<LoadMoreOnScrollListView> {
   }
   String searchText = "";
 
-  @override
+
+  bool _counselor = false;
+
+  bool get counselor => _counselor;
+
+  void setCounselor(bool counselor) {
+    _counselor = counselor;
+  }
+
+  void performDelayedSetState() {
+    // Perform any actions you need before changing the state
+
+    // Delayed setState after 2 seconds
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        // Change the state (e.g., update a boolean variable)
+        isFilterActivated = !counselor;
+      });
+
+      // Perform any actions after changing the state if needed
+    });
+  }
+
+
+    @override
   Widget build(BuildContext context) {
-    // bool allFalse = selectedItems.every((element) => element == false);
+
+    /// boolean for finish button
+    bool allFalse = true;
+    bool allTextFalse = false;
+    print('checked itemsId${urlKategory.toString()}');
 
 
 
+    if (isFilterActivated){
+      print("gushduhijd ---> true");
+    }
+    else{
+      setState(() {
+        print("gushduhijd ---> false");
+      });
 
+    }
 
 
     return Scaffold(
@@ -196,178 +255,258 @@ class _LoadMoreNewsState extends State<LoadMoreOnScrollListView> {
             onTap: () {
               showGeneralDialog(
                 barrierLabel: "Label",
-                barrierDismissible: true,
+                barrierDismissible: false,
                 transitionDuration: Duration(milliseconds: 700),
                 context: context,
                 pageBuilder: (context, anim1, anim2) {
                   return Scaffold(
-                    body: Container(
-                        margin: EdgeInsets.only(
-                            bottom: 0, left: 0, right: 0, top: 30),
-                        decoration: const BoxDecoration(
-                          color: Color.fromRGBO(241, 241, 249, 1),
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
+                    body:
+                    Container(
+                      margin: EdgeInsets.only(
+                          bottom: 0, left: 0, right: 0, top: 30),
+                      decoration: const BoxDecoration(
+                        color: Color.fromRGBO(241, 241, 249, 1),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20),
                         ),
-                        child: Column(
-                          children: [
-                            Row(
-                              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: ListTile(
-                                    title: const Text('Finish',
-                                style: TextStyle(
-                                  color:
-                                      Color.fromRGBO(17, 93, 165, 1),
-                                )),
+                      ),
+                      child:StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                          final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+                          GlobalKey<RefreshIndicatorState>();
+                          return WillPopScope(
+                              onWillPop: () async {
+                            // Your favorite action when the user presses the back button
+                                setState((){
+                                  selectedItems = List.generate(newsFilterItemsArray.length, (index) => false);
+                                  textEditingController.clear();
+                                  Navigator.of(context).pop();
+                                  isFilterActivated = false;
+                                });
+                            return true; // Return true to allow popping the dialog
+                          },
 
-                                    onTap: (){
 
-                                      searchText = textEditingController.text;
+                            child:
+                            Column(
+                            children: [
+                              Row(
+                                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child:
+                                        RefreshIndicator(
+                                        key: _refreshIndicatorKey,
+                                        onRefresh: () async {
+                                          // Trigger a refresh by calling the refresh method
+                                          _refreshIndicatorKey.currentState?.show();
+                                        },
+                                    child:
+                                    ListTile(
+                                      title: const Text('Finish',
+                                          style: TextStyle(
+                                            color:
+                                            Color.fromRGBO(17, 93, 165, 1),
+                                          )),
+                                      onTap: () async{
+                                        searchText = textEditingController.text;
+
+                                        print('checked items$selectedItems');
+                                        print('checked itemsId$selectedItemsId');
+                                        print('Entered Text: $searchText');
 
 
-                                      print('checked items$selectedItems');
-                                      print('checked itemsId$selectedItemsId');
-                                      print('Entered Text: $searchText');
-                                      Navigator.pop(context);
 
-                                    },
+                                          setState((){
+                                            // isFilterActivated = true;
+
+                                            performDelayedSetState();
+
+
+                                            // Check if each item in the list is empty using item.equals("")
+                                            bool allItemsEmpty = true;
+                                            Set<String> uniqueItems = {};
+                                            for (String item in selectedItemsId) {
+                                              if (item == "") {
+                                                // If any item is not empty, set the flag to false and break the loop
+                                                allItemsEmpty = false;
+                                              }else{
+                                                allItemsEmpty = true;
+                                                // strKategory = "&kategories[]=$item";
+                                                uniqueItems.add("&kategories[]=$item");
+
+                                              }
+                                            }
+
+                                            if (allItemsEmpty)
+                                            {
+                                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                                content: Text("empty"),
+                                              ));
+                                              urlKategory = "";
+                                            }
+                                            else{
+                                              // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                              //   content: Text("not empty"),
+                                              // ));
+                                              setState((){
+                                                urlKategory = uniqueItems.join("");
+                                                print("khali nade"+urlKategory);
+                                              });
+
+                                            }
+                                          });
+                                        Navigator.of(context).pop();
+
+
+                                        // Navigator.pop(context);
+                                      },
+                                    ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: ListTile(
-                                    title: const Align(
-                                          alignment: Alignment.topCenter,
-                                          child:Text('Filter',
-                                                  style: TextStyle(
-                                                    color:
-                                                    Colors.black,
-                                                  ),
+                                  ),
+                                  Expanded(
+                                    child: ListTile(
+                                      title: const Align(
+                                        alignment: Alignment.topCenter,
+                                        child: Text(
+                                          'Filter',
+                                          style: TextStyle(
+                                            color: Colors.black,
                                           ),
                                         ),
-                                    onTap: (){
-
-                                    },
+                                      ),
+                                      onTap: () {},
+                                    ),
                                   ),
-                                ),
-
-                                Expanded(
-                                  child:StatefulBuilder(
-                                    builder: (BuildContext context, StateSetter setState) {
-                                      return Visibility(
-                                        child: ListTile(
-                                          title: const Align(
-                                            alignment: Alignment.topRight,
-                                            child: Text('Reset',
-                                                style: TextStyle(
-                                                  color: Color.fromRGBO(
-                                                      17, 93, 165, 1),
-                                                )),
-                                          ),
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                          },
+                                  Expanded(
+                                    child:  Visibility(
+                                      visible: !allFalse || allTextFalse,
+                                      child: ListTile(
+                                        title: const Align(
+                                          alignment: Alignment.topRight,
+                                          child: Text('Reset',
+                                              style: TextStyle(
+                                                color: Color.fromRGBO(
+                                                    17, 93, 165, 1),
+                                              )),
                                         ),
-                                      );
-                                    },
-                                ),
-                               ),
-                              ],
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(left: 8.0),
-                              child: SizedBox(
-                                height: 30,
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text("Full Text Search",
-                                      style: TextStyle(
-                                        color: Color.fromRGBO(95, 94, 97, 1),
-                                        fontSize: 15,
-                                        decoration: TextDecoration.none,
-                                      )),
+                                        onTap: () {
+                                          setState((){
+                                            selectedItems = List.generate(newsFilterItemsArray.length, (index) => false);
+                                            textEditingController.clear();
+                                            isFilterActivated = false;
+                                          });
+
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 8.0),
+                                child: SizedBox(
+                                  height: 30,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text("Full Text Search",
+                                        style: TextStyle(
+                                          color: Color.fromRGBO(95, 94, 97, 1),
+                                          fontSize: 15,
+                                          decoration: TextDecoration.none,
+                                        )),
+                                  ),
                                 ),
                               ),
-                            ),
-
                               Container(
                                 color: Colors.white,
                                 child: Padding(
                                   padding: EdgeInsets.only(left: 10),
-                                  child:
-                                  TextField(
+                                  child: TextField(
                                     controller: textEditingController,
                                     decoration: const InputDecoration(
                                       hintText: 'Enter search text',
-                                      border:
-                                      InputBorder.none, // Set the hint text
+                                      border: InputBorder
+                                          .none, // Set the hint text
                                     ),
+                                    onChanged: (text){
+                                      enteredText = text;
+                                      setState((){
+                                        if (enteredText == "" || enteredText.isEmpty){
+                                          allTextFalse = false;
+                                        }else{
+                                          allTextFalse = true;
+                                        }
+
+                                      });
+                                    },
                                   ),
                                 ),
                               ),
-
-                            const Padding(
-                              padding: EdgeInsets.only(left: 8.0),
-                              child: SizedBox(
-                                height: 30,
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text("Categories",
-                                      style: TextStyle(
-                                        color: Color.fromRGBO(95, 94, 97, 1),
-                                        fontSize: 15,
-                                        decoration: TextDecoration.none,
-                                      )),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 8.0),
+                                child: SizedBox(
+                                  height: 30,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text("Categories",
+                                        style: TextStyle(
+                                          color: Color.fromRGBO(95, 94, 97, 1),
+                                          fontSize: 15,
+                                          decoration: TextDecoration.none,
+                                        )),
+                                  ),
                                 ),
                               ),
-                            ),
-                            StatefulBuilder(
-                               builder: (BuildContext context, StateSetter setState) {
-                                return ListView.separated(
-                                  shrinkWrap: true,
-                                  itemCount: newsFilterItemsArray.length,
-                                  separatorBuilder:(BuildContext context, int index)  =>
-                                  const Divider(height: 2,color: Colors.black,),
-                                  itemBuilder: (BuildContext context, int index) {
-                                    Filters item = newsFilterItemsArray[index];
-                                    return Container(
-                                      color: Colors.white,
-                                      child: ListTile(
-                                        title: Text(item.bezeichnung),
+                              ListView.separated(
+                                shrinkWrap: true,
+                                itemCount: newsFilterItemsArray.length,
+                                separatorBuilder:
+                                    (BuildContext context, int index) =>
+                                const Divider(
+                                  height: 2,
+                                  color: Colors.black,
+                                ),
+                                itemBuilder: (BuildContext context, int index) {
+                                  Filters item = newsFilterItemsArray[index];
+                                  return Container(
+                                    color: Colors.white,
+                                    child: ListTile(
+                                      title: Text(item.bezeichnung),
+                                      trailing: selectedItems[index]
+                                          ? const Icon(Icons.check,
+                                          color: Color.fromRGBO(17, 93, 165,
+                                              1)) // Show check mark if selected
+                                          : null,
+                                      onTap: () {
+                                        setState(() {
+                                          // Toggle the selected state when tapped
+                                          selectedItems[index] =
+                                          !selectedItems[index];
 
-                                        trailing: selectedItems[index]
-                                            ? const Icon(Icons.check, color: Color.fromRGBO(17, 93, 165, 1))// Show check mark if selected
-                                            : null,
+                                          /// allfalse will be true if all values are false
+                                          allFalse = selectedItems.every(
+                                                  (element) => element == false);
+                                          if (selectedItems[index]) {
+                                            String id = item.id.toString();
+                                            selectedItemsId[index] = id;
+                                            print("id=>${urlKategory.toString()}");
 
-                                        onTap: () {
-                                          setState(() {
-                                            // Toggle the selected state when tapped
-                                            selectedItems[index] = !selectedItems[index];
-
-                                            if(selectedItems[index]){
-                                              String id = item.id.toString();
-                                              selectedItemsId.add(id);
-                                            }
-                                            else{
-
-                                            }
-
-
-
-                                          });
-                                        },
-                                      ),
-                                    );
-                                  },
-                                );
-                               }
-                            ),
-
-                          ],
-                        ),
+                                          } else {
+                                            selectedItemsId[index] = "";
+                                          }
+                                        });
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                            );
+                        },
                       ),
+                    ),
 
                   );
                 },

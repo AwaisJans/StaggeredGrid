@@ -9,6 +9,7 @@ class AppConfig {
 
   static int get newsID => 3;
   static int get ferminID => 4;
+  static bool isFilter = false;
 
   static double get newsCardLeftMargin => 15;
   static double get newsCardRightMargin => 15;
@@ -21,9 +22,47 @@ class AppConfig {
   }
 
 
+
+  static String newsFilterItemsUrl(String kategoryListString,
+      String voltText,int limitStart, int limitItems) {
+
+    String returnedUrl;
+
+    String urlUnFilter = "https://www.schaeferlauf-markgroeningen.de/index.php?id=269&baseColor=0571B1&baseFontSize=16"
+        "&action=getNewsItems&limitStart=$limitStart&limitAmount=$limitItems";
+
+    String urlFiltered = "https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14"
+        "&action=getNewsItems$kategoryListString&volltext=$voltText"
+        "&limitStart=$limitStart&limitAmount=$limitItems";
+
+      if (isFilter){
+        returnedUrl = urlFiltered;
+      }
+      else{
+        returnedUrl = urlUnFilter;
+      }
+    return returnedUrl;
+
+
+  }
+
   static String ferminUrlItems(String baseUrl, int limitStart, int limitItems) {
     String url = "$baseUrl&action=getFirmaItems&limitStart=$limitStart&limitAmount=$limitItems";
     return url;
   }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
