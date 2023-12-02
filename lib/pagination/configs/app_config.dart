@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -24,7 +25,7 @@ class AppConfig {
 
 
   static String newsFilterItemsUrl(String kategoryListString,
-      String voltText,int limitStart, int limitItems) {
+      String voltText,int limitStart, int limitItems,bool bool1) {
 
     String returnedUrl;
 
@@ -35,12 +36,15 @@ class AppConfig {
         "&action=getNewsItems$kategoryListString&volltext=$voltText"
         "&limitStart=$limitStart&limitAmount=$limitItems";
 
-      if (isFilter){
+      // if (bool1){
         returnedUrl = urlFiltered;
-      }
-      else{
-        returnedUrl = urlUnFilter;
-      }
+        print("filtered_called");
+      // }
+      // else{
+      //   returnedUrl = urlUnFilter;
+      //   print("unfiltered_called");
+
+      // }
     return returnedUrl;
 
 

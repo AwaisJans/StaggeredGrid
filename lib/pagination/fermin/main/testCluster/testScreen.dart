@@ -11,7 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:test_project/pagination/fermin/main/fermin_list_view_screen.dart';
 import 'package:test_project/pagination/fermin/model/fermin_map_model/fermin_map_items.dart';
 
 import '../../../dashboard_items.dart';
