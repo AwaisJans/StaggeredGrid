@@ -40,7 +40,6 @@ class _testViewState extends State<testView> {
     'Cleaning',
     'Painting',
   ];
-
   ScrollController scrollController = ScrollController();
 
   bool isLoadingMore = false;
@@ -56,12 +55,8 @@ class _testViewState extends State<testView> {
     setState(() {
       isLoadingMore = true;
     });
-
     var beforeCount = ferminItemsArray.length;
-
-
     var response;
-
     if (isFilterActivated) {
       String urlFiltered = "https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14"
           "&action=getFirmaItems&$urlKategory&volltext=${enteredText}"
@@ -75,10 +70,8 @@ class _testViewState extends State<testView> {
       response = await http.get(Uri.parse(urlUnFiltered));
       print("false");
     }
-
     print("checkingFilterStatusASYNC${isFilterActivated.toString()}");
     bool newbool = isFilterActivated;
-
     if (newbool) {
       String urlFiltered = "https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14"
           "&action=getFirmaItems&$urlKategory&volltext=${enteredText}"
@@ -94,31 +87,20 @@ class _testViewState extends State<testView> {
       response = await http.get(Uri.parse(urlUnFiltered));
       print("newbool-false");
     }
-
-
     FerminItems newsItemsClass = FerminItems.fromJson(
         jsonDecode(response.body) as Map<String, dynamic>);
-
     ferminItemsArray = ferminItemsArray + newsItemsClass.fermin;
     int localOffset = _startLimit + _limit;
-
     var afterCount = ferminItemsArray.length;
-
     setState(() {
       ferminItemsArray;
       isLoadingMore = false;
       _startLimit = localOffset;
-
-
       if (beforeCount == afterCount) {
         noMoreItems = true;
       }
     });
-
-
   }
-
-
   @override
   void initState() {
 
@@ -130,7 +112,6 @@ class _testViewState extends State<testView> {
     loadStringValue(KATEGORY_PREFS);
     loadBooleanValue();
   }
-
   void handleNext() {
     scrollController.addListener(() async {
       if (isLoadingMore) return;
@@ -140,12 +121,9 @@ class _testViewState extends State<testView> {
       }
     });
   }
-
 // ------> Filter Variables
-
   List<Filters> newsFilterItemsArray = [];
   List<Filters> Sample = [];
-
   void fetchFilterData() async {
     final response =
     await http.get(Uri.parse("https://www.empfingen.de/index.php?id="
@@ -157,31 +135,23 @@ class _testViewState extends State<testView> {
 
     newsFilterItemsArray = newsFilterItemsArray + newsFilterItemsClass.filters;
   }
-
-
   List<bool> selectedItems = List.generate(18, (index) => false);
   List<String> selectedItemsId = List.generate(18, (index) => "");
   TextEditingController textEditingController = TextEditingController();
   String enteredText = "";
   bool isFilterActivated = false;
   String KATEGORY_PREFS = "categories";
-
-
   @override
   void dispose() {
     textEditingController.dispose();
     super.dispose();
   }
-
   String searchText = "";
   bool _counselor = false;
-
   bool get counselor => _counselor;
-
   void setCounselor(bool counselor) {
     _counselor = counselor;
   }
-
   void performDelayedSetState() {
     // Perform any actions you need before changing the state
 
@@ -196,30 +166,24 @@ class _testViewState extends State<testView> {
       // Perform any actions after changing the state if needed
     });
   }
-
-
   Future<void> _reload(var value) async {}
   bool allFalse = false;
   bool allTextFalse = false;
-
-
   // -----------> Map Variables
   late double _height = 400;
-  LatLng coordinate1 = LatLng(0, 0);
   late GoogleMapController mapController;
   LatLng loc1 = const LatLng(34.022723637768, 71.52425824981451);
   bool isFullScreen = false;
+  // Method to fetch markers
   Future<FerminMapItems> fetchAlbum() async {
-
+    String urlMap = "";
     if (isFilterActivated){
-
+      urlMap ="https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers&$urlKategory&volltext=${enteredText}"
+      "&limitStart=$_startLimit&limitAmount=$_limit";
     }else{
-
+      urlMap ="https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers";
     }
-
-
-    final response = await http.get(Uri.parse("https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14"
-        "&action=getFirmaMarkers"));
+    final response = await http.get(Uri.parse(urlMap));
     if (response.statusCode == 200) {
       return FerminMapItems.fromJson(
           jsonDecode(response.body) as Map<String, dynamic>);
@@ -239,16 +203,6 @@ class _testViewState extends State<testView> {
     zoom: 14.4746,
   );
   // on below line we have created the list of markers
-  final List<Marker> _markers = <Marker>[
-    const Marker(
-        markerId: MarkerId('1'),
-        position: LatLng(33.9984521, 71.5380679),
-        infoWindow: InfoWindow(
-          title: 'My Position',
-        )
-    ),
-  ];
-
   // created method for getting user current location
   Future<Position> getUserCurrentLocation() async {
     await Geolocator.requestPermission().then((value){
@@ -258,24 +212,26 @@ class _testViewState extends State<testView> {
     });
     return await Geolocator.getCurrentPosition();
   }
-
-
-
-
+  CameraPosition createInitialCameraPosition() {
+    if (coordinates.isNotEmpty) {
+      return CameraPosition(
+        target: coordinates[0],
+        zoom: 3.0,
+      );
+    } else {
+      // Default coordinates if the list is empty
+      return const CameraPosition(
+        target: LatLng(48.39503446981762, 8.699648380279541), // Default to San Francisco
+        zoom: 10.0,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
 
-    Set<Marker> markers = Set<Marker>.from([
-      Marker(
-        markerId: MarkerId("marker_1"),
-        position: LatLng(37.7749, -122.4194),
-        infoWindow: InfoWindow(
-          title: "Marker Title",
-          snippet: "Marker Snippet",
-        ),
-      ),
-    ]);
+    Set<Marker> markers = <Marker>{
+    };
 
 
 
@@ -362,8 +318,6 @@ class _testViewState extends State<testView> {
 
               child:Column(
               children: [
-
-
                 Visibility(
                   visible: isFilterActivated,
                   // Invert the condition to control visibility
@@ -453,7 +407,12 @@ class _testViewState extends State<testView> {
                                 ),
                               );
                             }
-                            coordinate1 = coordinates[0];
+
+
+
+
+
+
 
 
                             return StatefulBuilder(
@@ -490,10 +449,7 @@ class _testViewState extends State<testView> {
                                                             () => EagerGestureRecognizer(),
                                                       ),
                                                     },
-                                                    initialCameraPosition: CameraPosition( //innital position in map
-                                                      target: coordinate1, //initial position
-                                                      zoom: 15.0, //initial zoom level
-                                                    ),
+                                                    initialCameraPosition: createInitialCameraPosition(),
                                                     // initialCameraPosition: _kGoogle,
                                                     markers: markers,
                                                     onMapCreated: (controller) {
@@ -679,11 +635,6 @@ class _testViewState extends State<testView> {
                       }
                   ),
                 ),
-
-
-
-
-
               ],
             ),
 
@@ -1182,8 +1133,6 @@ class _testViewState extends State<testView> {
       },
     );
   }
-
-
   /// SharedPrefs Method for saving and getting Booleans
   void loadBooleanValue() async {
     // Use SharedPreferencesHelper to get the boolean value without explicitly handling a Future
@@ -1193,27 +1142,24 @@ class _testViewState extends State<testView> {
       print('checked filter boolean${isFilterActivated.toString()}');
     });
   }
-
   void saveBooleanValue(bool value) async {
     // Use SharedPreferencesHelper to set the boolean value without explicitly handling a Future
     await SharedPreferencesHelper.setBool('my_boolean_key1', value);
     // Reload the boolean value
     loadBooleanValue();
   }
-
   /// SharedPrefs Method for saving and getting String Values
   Future<void> loadStringValue(String key) async {
     // Use SharedPreferencesHelper to get the boolean value without explicitly handling a Future
     urlKategory = await SharedPreferencesHelper.getStr(key);
   }
-
+  /// SharedPrefs Method for saving and getting List
   void saveStringValue(String key,String value) async {
     // Use SharedPreferencesHelper to set the boolean value without explicitly handling a Future
     await SharedPreferencesHelper.setStr(key, value);
     // Reload the boolean value
     loadStringValue(key);
   }
-
   Future<void> storeList(List<bool> itemList) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -1280,8 +1226,6 @@ class _testViewState extends State<testView> {
       print('List not found in SharedPreferences');
     }
   }
-
-
   Future<void> _refresh() async {
     // Simulate a network request or any asynchronous operation
     await Future.delayed(Duration(seconds: 1));

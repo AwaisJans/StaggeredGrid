@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_project/map_classes/main/circleScreen.dart';
 
+import 'main/clusterScreenApproach2.dart';
 import 'main/polygonScreen.dart';
 
 void main() {
@@ -112,7 +113,10 @@ class _ButtonsMainScreenState extends State<ButtonsMainScreen> {
                       color: Colors.black,
                       child:ElevatedButton(
                         onPressed: () {
-
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ClusterView()),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           primary: Colors.black, // Change the background color here
