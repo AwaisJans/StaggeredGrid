@@ -1,4 +1,6 @@
+
 import 'package:fluster/fluster.dart';
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// [Fluster] can only handle markers that conform to the [Clusterable] abstract class.
@@ -11,10 +13,14 @@ class MapMarker extends Clusterable {
   final String id;
   final LatLng position;
   BitmapDescriptor? icon;
+  final void onTap;
+  final void onTap2;
 
   MapMarker({
     required this.id,
     required this.position,
+    this.onTap,
+    this.onTap2,
     this.icon,
     isCluster = false,
     clusterId,
@@ -37,5 +43,10 @@ class MapMarker extends Clusterable {
       position.longitude,
     ),
     icon: icon!,
+    onTap: isCluster!? (){
+      onTap;
+    }: (){
+      onTap2;
+    },
   );
 }
