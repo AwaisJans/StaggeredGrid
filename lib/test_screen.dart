@@ -18,6 +18,8 @@ import 'package:test_project/pagination/extensions/color_hex.dart';
 import 'package:test_project/pagination/fermin/main/fermin_item_details.dart';
 import 'package:test_project/pagination/fermin/model/ferminListViewModel/fermin_items.dart';
 import 'package:test_project/pagination/fermin/model/fermin_map_model/fermin_map_items.dart';
+import 'package:test_project/pagination/fermin/model/marker_popup_model/marker_popup_item.dart';
+import 'package:test_project/pagination/fermin/model/marker_popup_model/test.dart';
 import 'package:test_project/pagination/news/main/newsScreen.dart';
 import 'package:test_project/pagination/news/main/news_details_screen.dart';
 import 'package:test_project/pagination/news/models/filter_model/filter_items.dart';
@@ -50,6 +52,8 @@ class _testViewState extends State<testView> {
 
   List<Fermin> ferminItemsArray = [];
   late String urlKategory = "";
+
+  List<String> urlsPop = [];
 
   void fetchData(startLimit) async {
     setState(() {
@@ -101,17 +105,7 @@ class _testViewState extends State<testView> {
       }
     });
   }
-  @override
-  void initState() {
 
-    super.initState();
-    fetchData(_startLimit);
-    handleNext();
-    fetchFilterData();
-    retrieveList();
-    loadStringValue(KATEGORY_PREFS);
-    loadBooleanValue();
-  }
   void handleNext() {
     scrollController.addListener(() async {
       if (isLoadingMore) return;
@@ -216,7 +210,7 @@ class _testViewState extends State<testView> {
     if (coordinates.isNotEmpty) {
       return CameraPosition(
         target: coordinates[0],
-        zoom: 3.0,
+        zoom: 15.0,
       );
     } else {
       // Default coordinates if the list is empty
@@ -227,12 +221,165 @@ class _testViewState extends State<testView> {
     }
   }
 
+
+  void _showDialog(LatLng location) {
+    String urlPop = "";
+    for (int i = 0; i <= coordinates.length; i++) {
+      if (i < coordinates.length) {
+        if (location == coordinates[i]) {
+          urlPop = urlsPop[i];
+
+        }
+      }
+    }
+    // print("urlPop$urlPop");
+    getJsonString(urlPop);
+
+
+
+    if(dataList.isEmpty){
+      showDialog(
+        context: context,
+        barrierDismissible: false, // Dialog cannot be dismissed by tapping outside
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Container(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(), // Loading indicator
+                  SizedBox(height: 16.0),
+                  Text('Loading...'), // Loading text
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+      // Simulate a delay of 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        // Close the dialog after the delay
+        Navigator.of(context).pop();
+      });
+    }
+    else{
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+            Map<String, dynamic> jsonData = dataList[0];
+            PopupItems items = PopupItems.fromJson(jsonData);
+            return AlertDialog(
+                content:
+                Wrap(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 250,
+                                child:
+                                  Text(items.singleItem!.bezeichnung!,
+                                    style: const TextStyle(
+                                        overflow: TextOverflow.fade,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20),
+                                  ),
+                              ),
+
+                              Text(items.singleItem!.ort!,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 20),
+                              ),
+
+                              Text(items.singleItem!.strasse!,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 20),
+                              ),
+
+
+                      ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 18.0,
+                          width: 18.0,
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back_ios,color: Colors.black,),
+                            onPressed: () {
+                              // Handle back arrow tap
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                    Container(
+                      margin: const EdgeInsets.all(10),
+                      width: double.infinity,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            dataList.clear();
+                          },
+                          child: Text("Close")),
+                    ),
+
+                  ],
+                )
+            );
+        },
+      );
+    }
+
+
+  }
+
+  @override
+  void initState() {
+
+    super.initState();
+    fetchData(_startLimit);
+    handleNext();
+    fetchFilterData();
+    retrieveList();
+    loadStringValue(KATEGORY_PREFS);
+    loadBooleanValue();
+    // getJsonString("https://www.empfingen.de/app-v3-nativ?action=getFirmaPopUp&singleItemId=489&cHash=6845102aa506a1b1a471fc74c1bfb5ad");
+  }
+  // ========================== Popup Code ==========================
+  List<Map<String, dynamic>> dataList = [];
+
+
+  getJsonString(String apiUrl) async{
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonData = json.decode(response.body);
+        dataList.add(jsonData);
+      } else {
+        throw Exception('Failed to load data: ${response.reasonPhrase}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
 
     Set<Marker> markers = <Marker>{
     };
 
+    print("popupItemsArray$dataList");
 
 
     return Scaffold(
@@ -395,15 +542,30 @@ class _testViewState extends State<testView> {
 
                               }
                             }
+
+                            for (int i = 0; i <= item_length; i++) {
+                              if (i < item_length) {
+                                fermanMapItem item = items[i];
+
+                                urlsPop.add(item.urlPopUp!);
+                              }
+                            }
+
+                            print("urlsPop$urlsPop");
+
+
                             for (int i = 0; i < coordinates.length; i++) {
                               markers.add(
                                 Marker(
                                   markerId: MarkerId("marker_$i"),
                                   position: coordinates[i],
-                                  infoWindow: InfoWindow(
-                                    title: "Marker $i",
-                                    snippet: "Coordinates: ${coordinates[i]}",
-                                  ),
+                                  // infoWindow: InfoWindow(
+                                  //   title: "Marker $i",
+                                  //   snippet: "Coordinates: ${coordinates[i]}",
+                                  // ),
+                                  onTap: (){
+                                      _showDialog(coordinates[i]);
+                                  }
                                 ),
                               );
                             }

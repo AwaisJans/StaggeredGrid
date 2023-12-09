@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
@@ -6,7 +5,7 @@ import 'dart:ui';
 import 'dart:ui' as ui;
 import 'package:fluster/fluster.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart' ;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -17,14 +16,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_project/map_classes/main/cluster_utils/place_model.dart';
 import '../../pagination/fermin/model/fermin_map_model/fermin_map_items.dart';
 import 'cluster_utils/map_helper.dart';
 import 'cluster_utils/map_marker.dart';
 import 'google_cluster/place.dart';
-
-
-
 
 class ClusterView extends StatefulWidget {
   @override
@@ -32,62 +29,75 @@ class ClusterView extends StatefulWidget {
 }
 
 class _ClusterViewState extends State<ClusterView> {
-
   late double _height = 400;
   late GoogleMapController mapController;
   LatLng loc1 = const LatLng(34.022723637768, 71.52425824981451);
   bool isFullScreen = false;
+
   // Method to fetch markers
   Future<FerminMapItems> fetchAlbum() async {
-
-    String urlMap = "https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers";
+    String urlMap =
+        "https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers";
     final response = await http.get(Uri.parse(urlMap));
 
-
-
     if (response.statusCode == 200) {
-
       return FerminMapItems.fromJson(
           jsonDecode(response.body) as Map<String, dynamic>);
     } else {
       throw Exception('Failed to load album');
     }
-
   }
+
   List<LatLng> coordinates = [];
   MapType currentMapType = MapType.normal;
   Completer<GoogleMapController> _controller = Completer();
+
   // on below line we have specified camera position
   static const CameraPosition _kGoogle = CameraPosition(
     target: LatLng(20.42796133580664, 80.885749655962),
     zoom: 14.4746,
   );
+
   // on below line we have created the list of markers
   // created method for getting user current location
   Future<Position> getUserCurrentLocation() async {
-    await Geolocator.requestPermission().then((value){
-    }).onError((error, stackTrace) async {
+    await Geolocator.requestPermission()
+        .then((value) {})
+        .onError((error, stackTrace) async {
       await Geolocator.requestPermission();
-      print("ERROR"+error.toString());
+      print("ERROR" + error.toString());
     });
     return await Geolocator.getCurrentPosition();
   }
-  CameraPosition createInitialCameraPosition() {
-    if (coordinates.isNotEmpty) {
-      return CameraPosition(
-        target: coordinates[0],
-        zoom: 15.0,
-      );
-    } else {
-      // Default coordinates if the list is empty
-      return const CameraPosition(
-        target: LatLng(48.39503446981762, 8.699648380279541), // Default to San Francisco
-        zoom: 10.0,
-      );
-    }
-  }
+
+  CameraPosition createInitialCameraPosition =
+  // if (coordinates.isNotEmpty) {
+  //   return CameraPosition(
+  //     target: coordinates[0],
+  //     zoom: 10
+  //   );
+  // } else {
+  //   // Default coordinates if the list is empty
+  const CameraPosition(
+    target: LatLng(48.39503446981762, 8.699648380279541),
+    zoom: 16, // Default to San Francisco
+  );
+
+// }
+// }
 
 // -------------> Cluster Code
+
+  // @override
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  //
+  //
+  //   _manager = ClusterManager<Place>(
+  //       itemsPlaces, _updateMarkers,
+  //       markerBuilder: _markerBuilder);
+  // }
 
   late ClusterManager _manager;
 
@@ -95,12 +105,8 @@ class _ClusterViewState extends State<ClusterView> {
 
   Set<Marker> markers = Set();
 
-  final CameraPosition _parisCameraPosition =
-  CameraPosition(target: LatLng(48.856613, 2.352222), zoom: 10);
 
-  List<Place> itemsPlaces = [
-
-  ];
+  List<Place> itemsPlaces = [];
 
   // List<LatLng> coordinates = [
   //   LatLng(66.160507, -153.369141),
@@ -112,46 +118,56 @@ class _ClusterViewState extends State<ClusterView> {
 
   bool hasCodeRun = false;
 
-
-  @override
-  void initState() {
-
-    super.initState();
-  }
-
-  ClusterManager _initClusterManager() {
-    return ClusterManager<Place>(itemsPlaces, _updateMarkers,
-        markerBuilder: _markerBuilder);
-  }
-
   void _updateMarkers(Set<Marker> markers) {
     print('Updated ${markers.length} markers');
     setState(() {
       this.markers = markers;
     });
   }
-  Future<void> animateTo(LatLng position,double zoom) async {
-    final c = await _controller.future;
-    final p = CameraPosition(target: position, zoom: zoom);
-    c.animateCamera(CameraUpdate.newCameraPosition(p));
+
+  Future<void> animateTo(LatLng position, double zoom) async {
+    // final c = await _controller.future;
+    await saveZoomLevel(zoom);
+    double retrievedZoomLevel = await getZoomLevel();
+    // setState(() {
+    final p = CameraPosition(target: position, zoom: retrievedZoomLevel);
+    mapController.animateCamera(CameraUpdate.newCameraPosition(p));
+    // });
+
   }
+
+  Future<double> getZoomLevel() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getDouble('zoomLevel') ??
+        10.0; // Default zoom level if not found
+  }
+
+  Future<void> saveZoomLevel(double zoomLevel) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setDouble('zoomLevel', zoomLevel);
+  }
+
 
   Future<Marker> Function(Cluster<Place>) get _markerBuilder =>
           (cluster) async {
         return Marker(
           markerId: MarkerId(cluster.getId()),
           position: cluster.location,
+          // infoWindow: InfoWindow(title: 'Marker Title', snippet: 'This is a marker snippet'),
           onTap: () {
             print('---- $cluster');
 
-            cluster.isMultiple ? {
-                animateTo(cluster.location, 14)
-            } : {
+            cluster.isMultiple
+                ? {animateTo(cluster.location, 19),
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text("marker"),
+                content: Text("cluster"),
               ))
-            };
+            }
+                : {
+              //// Marker pop up
+              _showDialog(cluster.location) // You can show a dialog or any other widget here
 
+            };
 
             cluster.items.forEach((p) => print(p));
           },
@@ -165,8 +181,10 @@ class _ClusterViewState extends State<ClusterView> {
 
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
-    final Paint paint1 = Paint()..color = Colors.orange;
-    final Paint paint2 = Paint()..color = Colors.white;
+    final Paint paint1 = Paint()
+      ..color = Colors.orange;
+    final Paint paint2 = Paint()
+      ..color = Colors.white;
 
     canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);
     canvas.drawCircle(Offset(size / 2, size / 2), size / 2.2, paint2);
@@ -187,6 +205,9 @@ class _ClusterViewState extends State<ClusterView> {
         Offset(size / 2 - painter.width / 2, size / 2 - painter.height / 2),
       );
     }
+    else {
+      return BitmapDescriptor.defaultMarker;
+    }
 
     final img = await pictureRecorder.endRecording().toImage(size, size);
     final data = await img.toByteData(format: ImageByteFormat.png) as ByteData;
@@ -194,17 +215,109 @@ class _ClusterViewState extends State<ClusterView> {
     return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
   }
 
+  // ------------------------------------------------ Popup Marker Code
+
+  List<String> urlsPop = [];
+  void _showDialog(LatLng location) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String urlPop = "";
+        for (int i = 0; i <= coordinates.length; i++) {
+          if (i < coordinates.length) {
+            if (location == coordinates[i]) {
+              urlPop = urlsPop[i];
+            }
+          }
+        }
+        print("urlPop$urlPop");
+
+
+
+        return AlertDialog(
+          content:
+          Container(
+            height: 90,
+            child:
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(urlPop,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20),
+                    ),
+                    Text("Description",
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          fontSize: 20),
+                    ),
+
+                    Text("Address",
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          fontSize: 20),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                    height: 18.0,
+                    width: 18.0,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back_ios,color: Colors.black,),
+                      onPressed: () {
+                        // Handle back arrow tap
+                      },
+                    ),
+                )
+
+              ],
+            ),
+
+          ),
+        );
+      },
+    );
+  }
+
+
+
+  // void fetchData() async {
+  //     String urlFiltered =
+  //         "https://www.empfingen.de/app-v3-nativ?action=getFirmaPopUp&singleItemId=489&cHash=6845102aa506a1b1a471fc74c1bfb5ad";
+  //     var response = await http.get(Uri.parse(urlFiltered));
+  //
+  //   NewsItems newsItemsClass =
+  //   NewsItems.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  //   newsItemsArray = newsItemsArray + newsItemsClass.news;
+  //   int localOffset = _startLimit + _limit;
+  //   var afterCount = newsItemsArray.length;
+  //   setState(() {
+  //     newsItemsArray;
+  //     isLoadingMore = false;
+  //     _startLimit = localOffset;
+  //     log("localOffset $_startLimit");
+  //     if (beforeCount == afterCount) {
+  //       noMoreItems = true;
+  //       log("noMoreItemsCalled $noMoreItems");
+  //     }
+  //   });
+  // }
+
+
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
-    // Set<Marker> markers = <Marker>{};
 
-
-// ...
-
-
-
-
-   /* return Scaffold(
+    /* return Scaffold(
       appBar: AppBar(
         title: Text('Markers and Clusters Example'),
       ),
@@ -235,6 +348,7 @@ class _ClusterViewState extends State<ClusterView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+
         /// Title Name
         title: const Text(
           "Cluster Example",
@@ -244,383 +358,457 @@ class _ClusterViewState extends State<ClusterView> {
         ),
       ),
       backgroundColor: Colors.grey,
-
       body: Column(
+          children: [
+      FutureBuilder<FerminMapItems>(
+      future: fetchAlbum(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          }
+          if (snapshot.hasData) {
+            List<fermanMapItem> items = snapshot.data!.ferminMap;
+            int item_length = items.length;
+
+
+            for (int i = 0; i <= item_length; i++) {
+              if (i < item_length) {
+                fermanMapItem item = items[i];
+
+                urlsPop.add(item.urlPopUp!);
+              }
+            }
+
+            print("urlsPop$urlsPop");
+
+
+            for (int i = 0; i <= item_length; i++) {
+              if (i < item_length) {
+                fermanMapItem item = items[i];
+
+                double lat = double.parse(item.lat!);
+                double lng = double.parse(item.lng!);
+
+                coordinates.add(LatLng(lat, lng));
+              }
+            }
+            // createInitialCameraPosition();
+
+            for (int i = 0; i < coordinates.length; i++) {
+              itemsPlaces.add(
+                  Place(name: 'New Place $i', latLng: coordinates[i]));
+            }
+
+            List<LatLng> coordinatesList =
+            itemsPlaces.map((place) => place.latLng).toList();
+
+            print("coordinatesList$coordinatesList");
+
+            if (!hasCodeRun) {
+              // Your code to run only once
+
+              _manager = ClusterManager<Place>(
+                  itemsPlaces, _updateMarkers,
+                  markerBuilder: _markerBuilder);
+
+              // _manager.setItems(<Place>[
+              //   for (int j = 0; j < coordinatesList.length; j++)
+              //     Place(
+              //         name: 'New Place $j',
+              //         latLng: coordinatesList[j])
+              // ]);
+
+              // Set the flag to true after the code has run
+              hasCodeRun = true;
+              print("hasCodeRun$hasCodeRun");
+            }
+
+            // _manager.setItems(<Place>[
+            //   for (int j = 0; j < coordinatesList.length; j++)
+            //     Place(
+            //         name: 'New Place $j',
+            //         latLng: coordinatesList[j])
+            // ]);
+
+            // for (int i = 0; i < coordinates.length; i++){
+            //   markers.add(Marker(
+            //       markerId: MarkerId("name$i"),
+            //       position: coordinates[i]
+            //   ),
+            //   );
+            //
+            //
+            // }
+
+            print("places-->${itemsPlaces}");
+
+            //
+            // // for(int i=0;i<coordinates.length;i++){
+            // //   placeList.add(PlaceModel(id:i, type: 1, name: "Example Place1",latLng:coordinates[i]));
+            // // }
+            //
+            //
+            //
+            // Convert the PlaceModel list to JSON
+            // List<Map<String, dynamic>> jsonList = coordinates.map((place) => place.toJson()).toList();
+
+            // jsonList.forEach((item) {
+            //   print("places-->${jsonEncode(item)}");
+            //   // print("places-->${coordinates.length}");
+            // });
+            //
+            //
+            // for (int i = 0; i < coordinates.length; i++) {
+            //   markers.add(
+            //     Marker(
+            //       markerId: MarkerId("marker_$i"),
+            //       position: coordinates[i],
+            //       infoWindow: InfoWindow(
+            //         title: "Marker $i",
+            //         snippet: "Coordinates: ${coordinates[i]}",
+            //       ),
+            //     ),
+            //   );
+            // }
+
+            // _initMarkers();
+
+            // getAddressFromCoordinates(coordinates[0]);
+
+            return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Column(
+                  children: [
+                Stack(
                 children: [
 
-                    FutureBuilder<FerminMapItems>(
-                        future: fetchAlbum(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.done) {
-                            if (snapshot.hasError) {
-                              return Center(
-                                child: Text('Error: ${snapshot.error}'),
-                              );
-                            }
-                            if (snapshot.hasData) {
+                Container(
+                height: _height,
+                  child:
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(0),
+                        topRight: Radius.circular(0),
+                        bottomRight: Radius.circular(50),
+                        bottomLeft: Radius.circular(50)),
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      heightFactor: 1.0,
+                      widthFactor: 2.5,
+                      child: AnimatedContainer(
+                        duration: Duration(milliseconds: 500),
+                        width: double.infinity,
+                        height: _height,
+                        child:
 
-                              List<fermanMapItem> items = snapshot.data!.ferminMap;
-                              int item_length = items.length;
-                              for(int i=0;i<=item_length;i++){
-                                if (i < item_length){
-                                  fermanMapItem item = items[i];
-
-                                  double lat = double.parse(item.lat!);
-                                  double lng = double.parse(item.lng!);
-
-                                  coordinates.add(LatLng(lat, lng));
-                                }
-                              }
-                              createInitialCameraPosition();
-
-
-                              for (int i = 0; i < coordinates.length; i++){
-                                itemsPlaces.add(Place(
-                                    name: 'New Place $i',
-                                    latLng: coordinates[i])
-                                );
-                              }
-                              if (!hasCodeRun) {
-                                // Your code to run only once
-                                _manager = _initClusterManager();
-
-
-                                // Set the flag to true after the code has run
-                                hasCodeRun = true;
-                                print("hasCodeRun$hasCodeRun");
-                              }
-
-                              // _manager.setItems(<Place>[
-                              //   for (int i = 0; i < itemsPlaces.length; i++)
-                              //     Place(
-                              //         name: 'New Place $i',
-                              //         latLng: )
-                              // ]);
-
-                              // for (int i = 0; i < coordinates.length; i++){
-                              //   markers.add(Marker(
-                              //       markerId: MarkerId("name$i"),
-                              //       position: coordinates[i]
-                              //   ),
-                              //   );
-                              //
-                              //
-                              // }
-
-                              print("places-->${itemsPlaces}");
-
-                              //
-                              // // for(int i=0;i<coordinates.length;i++){
-                              // //   placeList.add(PlaceModel(id:i, type: 1, name: "Example Place1",latLng:coordinates[i]));
-                              // // }
-                              //
-                              //
-                              //
-                              // Convert the PlaceModel list to JSON
-                              // List<Map<String, dynamic>> jsonList = coordinates.map((place) => place.toJson()).toList();
-
-                              // jsonList.forEach((item) {
-                              //   print("places-->${jsonEncode(item)}");
-                              //   // print("places-->${coordinates.length}");
-                              // });
-                              //
-                              //
-                              // for (int i = 0; i < coordinates.length; i++) {
-                              //   markers.add(
-                              //     Marker(
-                              //       markerId: MarkerId("marker_$i"),
-                              //       position: coordinates[i],
-                              //       infoWindow: InfoWindow(
-                              //         title: "Marker $i",
-                              //         snippet: "Coordinates: ${coordinates[i]}",
-                              //       ),
-                              //     ),
-                              //   );
-                              // }
-
-
-                            // _initMarkers();
-
-                              // getAddressFromCoordinates(coordinates[0]);
-
-
-                              return StatefulBuilder(
-                                builder: (BuildContext context, StateSetter setState) {
-
-                                  return
-                                    Column(
-                                    children: [
-                                      Stack(
-                                        children: [
-                                          Container(
-                                            height:_height,
-                                            child:  ClipRRect(
-                                              borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(0),
-                                                  topRight: Radius.circular(0),
-                                                  bottomRight: Radius.circular(50),
-                                                  bottomLeft: Radius.circular(50)),
-                                              child:Align(
-                                                alignment: Alignment.bottomRight,
-                                                heightFactor: 1.0,
-                                                widthFactor: 2.5,
-                                                child: AnimatedContainer(
-                                                  duration: Duration(milliseconds: 500),
-                                                  width: double.infinity,
-                                                  height: _height,
-                                                  child:GoogleMap( //Map widget from google_maps_flutter package
-                                                      zoomGesturesEnabled: true, //enable Zoom in, out on map
-                                                      tiltGesturesEnabled: true,
-                                                      mapType: currentMapType,
-                                                      myLocationEnabled: true, // Enable the "My Location" button
-                                                      // scrollGesturesEnabled: true,
-                                                      // gestureRecognizers:
-                                                      // <Factory<OneSequenceGestureRecognizer>>{
-                                                      //   Factory<OneSequenceGestureRecognizer>(
-                                                      //         () => EagerGestureRecognizer(),
-                                                      //   ),
-                                                      // },
-                                                      initialCameraPosition: createInitialCameraPosition(),
-                                                      // initialCameraPosition: _kGoogle,
-                                                      // markers: markers,
-
-                                                      // initialCameraPosition: _parisCameraPosition,
-                                                      markers: markers,
-                                                      onMapCreated: (GoogleMapController controller) {
-                                                        _controller.complete(controller);
-                                                        _manager.setMapId(controller.mapId);
-                                                      },
-                                                      onCameraMove: _manager.onCameraMove,
-                                                      onCameraIdle: _manager.updateMap,
-
-
-
-                                                      // onMapCreated: (controller) {
-                                                      //   mapController = controller;
-                                                      //   _controller.complete(controller);
-                                                      // }
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-
-                                          Positioned(
-                                            right: 20.0, // Adjust the top position as needed
-                                            top: 20.0, // Adjust the left position as needed
-                                            child: Container(
-                                                alignment: Alignment.topRight,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius: BorderRadius.circular(8.0),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Colors.black.withOpacity(0.2),
-                                                      spreadRadius: 2,
-                                                      blurRadius: 4,
-                                                      offset: Offset(0, 2),
-                                                    ),
-                                                  ],
-                                                ),
-                                                child:  Column(
-                                                  children: [
-                                                    Container(
-                                                      height:170,
-                                                      width: 50,
-                                                      child:ListView(
-                                                        children:
-                                                        ListTile.divideTiles( //
-                                                            context: context,
-                                                            tiles: [
-                                                              ListTile(
-                                                                title: const Center(child:Icon(
-                                                                  Icons.more_vert, // Calendar icon
-                                                                  color: Color.fromRGBO(6, 43, 105, 1), //
-                                                                ),),
-                                                                onTap: (){
-                                                                  showModalBottomSheet(
-                                                                    context: context,
-                                                                    barrierColor: Colors.black.withAlpha(1),
-                                                                    backgroundColor: Colors.transparent,
-                                                                    builder: (BuildContext context) {
-                                                                      return Container(
-
-                                                                        margin: EdgeInsets.all(10),
-                                                                        decoration: const BoxDecoration(
-                                                                          color: Color.fromRGBO(209, 205, 208, 1.0),
-                                                                          borderRadius: BorderRadius.only(
-                                                                            topLeft: Radius.circular(15.0),
-                                                                            topRight: Radius.circular(15.0),
-                                                                            bottomRight: Radius.circular(15.0),
-                                                                            bottomLeft: Radius.circular(15.0),
-                                                                          ),
-                                                                        ),
-                                                                        height: 170.0,
-                                                                        child: ListView(
-                                                                          children:
-                                                                          ListTile.divideTiles( //
-                                                                              context: context,
-                                                                              tiles: [
-                                                                                ListTile(
-                                                                                  title: const Text('Standard',
-                                                                                    textAlign: TextAlign.center,
-                                                                                  ),
-                                                                                  onTap: (){
-                                                                                    setState(() {
-                                                                                      currentMapType = MapType.terrain;
-                                                                                    });
-
-                                                                                    Navigator.pop(context);
-                                                                                  },
-                                                                                ),
-                                                                                ListTile(
-                                                                                  title: const Text('Satelite',
-                                                                                    textAlign: TextAlign.center,
-                                                                                  ),
-                                                                                  onTap: (){
-                                                                                    setState(() {
-                                                                                      currentMapType = MapType.satellite;
-                                                                                    });
-
-                                                                                    Navigator.pop(context);
-                                                                                  },
-                                                                                ),
-                                                                                ListTile(
-                                                                                  title: const Text('Hybrid',
-                                                                                    textAlign: TextAlign.center,
-                                                                                  ),
-                                                                                  onTap: (){
-                                                                                    setState(() {
-                                                                                      currentMapType = MapType.hybrid;
-                                                                                    });
-
-
-
-                                                                                    Navigator.pop(context);
-                                                                                  },
-
-                                                                                ),
-                                                                              ]
-                                                                          ).toList(),
-
-                                                                        ),
-                                                                      );
-                                                                    },
-                                                                  );
-                                                                },
-                                                              ),
-                                                              ListTile(
-                                                                title:  Icon(isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                                                                  color: Color.fromRGBO(6, 43, 105, 1),
-                                                                ),
-                                                                onTap: (){
-                                                                  setState(() {
-                                                                    isFullScreen = !isFullScreen;
-                                                                  });
-
-
-                                                                  if (isFullScreen){
-                                                                    _height = 1000;
-                                                                  }
-                                                                  else{
-                                                                    _height = 400;
-                                                                  }
-
-                                                                },
-                                                              ),
-                                                              ListTile(
-                                                                title: const  Icon(
-                                                                  Icons.send, // Calendar icon
-                                                                  color: Color.fromRGBO(6, 43, 105, 1), //
-                                                                ),
-                                                                onTap: () {
-
-                                                                  getUserCurrentLocation().then((value) {
-
-                                                                    LatLng currentCoordinate = LatLng(value.latitude, value.longitude);
-
-                                                                    // markers.add(
-                                                                    //   Marker(
-                                                                    //     markerId: MarkerId("marker_235"),
-                                                                    //     position: currentCoordinate,
-                                                                    //     infoWindow: InfoWindow(
-                                                                    //       title: "Marker jan",
-                                                                    //       snippet: "Coordinates:$currentCoordinate",
-                                                                    //     ),
-                                                                    //   ),
-                                                                    // );
-                                                                    mapController.animateCamera(
-                                                                      CameraUpdate.newLatLngZoom(currentCoordinate, 20),
-                                                                    );
-
-                                                                  });
-                                                                },
-
-                                                              ),
-                                                            ]
-                                                        ).toList(),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                )
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            };
-                          };
-
-                          return  Container(
-                            height: 400,
-                            child:const Center(
-                              child:CircularProgressIndicator(),
+                        GoogleMap(
+                          //Map widget from google_maps_flutter package
+                          zoomGesturesEnabled: true,
+                          //enable Zoom in, out on map
+                          tiltGesturesEnabled: true,
+                          mapType: currentMapType,
+                          myLocationEnabled: true,
+                          // Enable the "My Location" button
+                          scrollGesturesEnabled: true,
+                          gestureRecognizers:
+                          <Factory<OneSequenceGestureRecognizer>>{
+                            Factory<OneSequenceGestureRecognizer>(
+                                  () => EagerGestureRecognizer(),
                             ),
-                          );
-                        }
+                          },
+                          initialCameraPosition:
+                          createInitialCameraPosition,
+                          markers: markers,
+                          onMapCreated:
+                              (GoogleMapController controller) {
+                            mapController = controller;
+                            _controller.complete(controller);
+                            setState(() {
+                              _manager.setMapId(controller.mapId);
+                            });
+                          },
+                          onCameraMove: (position) {
+                            setState(() {
+                              _manager.onCameraMove;
+                            });
+                          },
+                          onCameraIdle: () {
+                            setState(() {
+                              _manager.updateMap();
+                            });
+                          },
+
+                        ),
+                      ),
                     ),
+                  ),
+                ),
+                Positioned(
+                right: 20.0,
+                // Adjust the top position as needed
+                top: 20.0,
+                // Adjust the left position as needed
+                child: Container(
+                alignment: Alignment.topRight,
+                decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius:
+                BorderRadius.circular(8.0),
+                boxShadow: [
+                BoxShadow(
+                color:
+                Colors.black.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 4,
+                offset: Offset(0, 2),
+                ),
                 ],
+                ),
+                child:
+               Column(
+              children: [
+              Container(
+              height: 170,
+              width: 50,
+              child: ListView(
+                children: ListTile.divideTiles(
+                  //
+                    context: context,
+                    tiles: [
+                      ListTile(
+                        title: const Center(
+                          child: Icon(
+                            Icons.more_vert,
+                            // Calendar icon
+                            color: Color.fromRGBO(
+                                6, 43, 105, 1), //
+                          ),
+                        ),
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            barrierColor: Colors
+                                .black
+                                .withAlpha(1),
+                            backgroundColor:
+                            Colors
+                                .transparent,
+                            builder: (BuildContext
+                            context) {
+                              return Container(
+                                margin: EdgeInsets
+                                    .all(10),
+                                decoration:
+                                const BoxDecoration(
+                                  color: Color
+                                      .fromRGBO(
+                                      209,
+                                      205,
+                                      208,
+                                      1.0),
+                                  borderRadius:
+                                  BorderRadius
+                                      .only(
+                                    topLeft: Radius
+                                        .circular(
+                                        15.0),
+                                    topRight: Radius
+                                        .circular(
+                                        15.0),
+                                    bottomRight: Radius
+                                        .circular(
+                                        15.0),
+                                    bottomLeft: Radius
+                                        .circular(
+                                        15.0),
+                                  ),
+                                ),
+                                height: 170.0,
+                                child: ListView(
+                                  children: ListTile
+                                      .divideTiles(
+                                    //
+                                      context:
+                                      context,
+                                      tiles: [
+                                        ListTile(
+                                          title:
+                                          const Text(
+                                            'Standard',
+                                            textAlign:
+                                            TextAlign.center,
+                                          ),
+                                          onTap:
+                                              () {
+                                            setState(
+                                                    () {
+                                                  currentMapType =
+                                                      MapType.terrain;
+                                                });
+
+                                            Navigator.pop(
+                                                context);
+                                          },
+                                        ),
+                                        ListTile(
+                                          title:
+                                          const Text(
+                                            'Satelite',
+                                            textAlign:
+                                            TextAlign.center,
+                                          ),
+                                          onTap:
+                                              () {
+                                            setState(
+                                                    () {
+                                                  currentMapType =
+                                                      MapType.satellite;
+                                                });
+
+                                            Navigator.pop(
+                                                context);
+                                          },
+                                        ),
+                                        ListTile(
+                                          title:
+                                          const Text(
+                                            'Hybrid',
+                                            textAlign:
+                                            TextAlign.center,
+                                          ),
+                                          onTap:
+                                              () {
+                                            setState(
+                                                    () {
+                                                  currentMapType =
+                                                      MapType.hybrid;
+                                                });
+
+                                            Navigator.pop(
+                                                context);
+                                          },
+                                        ),
+                                      ]).toList(),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      ListTile(
+                        title: Icon(
+                          isFullScreen
+                              ? Icons
+                              .fullscreen_exit
+                              : Icons.fullscreen,
+                          color: Color.fromRGBO(
+                              6, 43, 105, 1),
+                        ),
+                        onTap: () {
+                          setState(() {
+                            isFullScreen =
+                            !isFullScreen;
+                          });
+
+                          if (isFullScreen) {
+                            _height = 700;
+                          } else {
+                            _height = 400;
+                          }
+                        },
+                      ),
+                      ListTile(
+                        title: const Icon(
+                          Icons.send,
+                          // Calendar icon
+                          color: Color.fromRGBO(
+                              6, 43, 105, 1), //
+                        ),
+                        onTap: () {
+                          getUserCurrentLocation()
+                              .then((value) {
+                            LatLng
+                            currentCoordinate =
+                            LatLng(
+                                value
+                                    .latitude,
+                                value
+                                    .longitude);
+
+                            // markers.add(
+                            //   Marker(
+                            //     markerId: MarkerId("marker_235"),
+                            //     position: currentCoordinate,
+                            //     infoWindow: InfoWindow(
+                            //       title: "Marker jan",
+                            //       snippet: "Coordinates:$currentCoordinate",
+                            //     ),
+                            //   ),
+                            // );
+                            mapController
+                                .animateCamera(
+                              CameraUpdate
+                                  .newLatLngZoom(
+                                  currentCoordinate,
+                                  20),
+                            );
+                          });
+                        },
+                      ),
+                    ]).toList(),
               ),
+            ),
+        ],
+        )),
+        ),
+        ],
+        ),
+        ],
+        );
+        },
+        );
+        };
+      };
 
-
+      return Container(
+      height: 400,
+      child: const Center(
+      ),
     );
   }
 
+  )
 
+  ,
 
-  Future<String> getAddressFromCoordinates(LatLng latLng) async {
-    try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(latLng.latitude,latLng.longitude);
+  ]
 
-      if (placemarks != null && placemarks.isNotEmpty) {
-        Placemark place = placemarks[0];
-        String address = place.street!;
-        print("address$address");
-        return address;
-      } else {
-        return 'No address found';
-      }
-    } catch (e) {
-      return 'Error fetching address';
-    }
-  }
+  ,
 
+  )
+
+  ,
+
+  );
 }
 
+Future<String> getAddressFromCoordinates(LatLng latLng) async {
+  try {
+    List<Placemark> placemarks =
+    await placemarkFromCoordinates(latLng.latitude, latLng.longitude);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    if (placemarks != null && placemarks.isNotEmpty) {
+      Placemark place = placemarks[0];
+      String address = place.street!;
+      print("address$address");
+      return address;
+    } else {
+      return 'No address found';
+    }
+  } catch (e) {
+    return 'Error fetching address';
+  }
+}}
