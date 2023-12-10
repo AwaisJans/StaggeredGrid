@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,18 +13,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_project/fermin_popup_next_page.dart';
 import 'package:test_project/pagination/configs/app_config.dart';
 import 'package:test_project/pagination/configs/default_config.dart';
 import 'package:test_project/pagination/extensions/color_hex.dart';
 import 'package:test_project/pagination/fermin/main/fermin_item_details.dart';
 import 'package:test_project/pagination/fermin/model/ferminListViewModel/fermin_items.dart';
 import 'package:test_project/pagination/fermin/model/fermin_map_model/fermin_map_items.dart';
-import 'package:test_project/pagination/fermin/model/marker_popup_model/marker_popup_item.dart';
-import 'package:test_project/pagination/fermin/model/marker_popup_model/test.dart';
+import 'package:test_project/pagination/fermin/model/marker_popup_model/marker_popup_model.dart';
 import 'package:test_project/pagination/news/main/newsScreen.dart';
 import 'package:test_project/pagination/news/main/news_details_screen.dart';
 import 'package:test_project/pagination/news/models/filter_model/filter_items.dart';
 import 'package:test_project/pagination/news/news_items.dart';
+
+import 'map_classes/main/info_window/edge.dart';
+import 'map_classes/main/info_window/triangle.dart';
 
 void main() {
   runApp(MaterialApp(home: testView()));
@@ -138,6 +142,7 @@ class _testViewState extends State<testView> {
   @override
   void dispose() {
     textEditingController.dispose();
+    _customInfoWindowController.dispose();
     super.dispose();
   }
   String searchText = "";
@@ -175,7 +180,12 @@ class _testViewState extends State<testView> {
       urlMap ="https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers&$urlKategory&volltext=${enteredText}"
       "&limitStart=$_startLimit&limitAmount=$_limit";
     }else{
-      urlMap ="https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers";
+      // urlMap ="https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers";
+      // urlMap ="https://www.heroldstatt.de/index.php?id=374&baseColor=005398&baseFontSize=14&action=getFirmaMarkers";
+      // urlMap ="https://www.kupferzell.de/index.php?id=327&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers";
+      // urlMap ="https://www.vellberg.de/index.php?id=483&baseColor=D00218&baseFontSize=15&action=getFirmaMarkers";
+      // urlMap ="https://www.mainhardt.de/index.php?id=521&baseColor=D00218&baseFontSize=15&action=getFirmaMarkers";
+      urlMap ="https://www.beuren.de/index.php?id=619&baseColor=D00218&baseFontSize=15&action=getFirmaMarkers";
     }
     final response = await http.get(Uri.parse(urlMap));
     if (response.statusCode == 200) {
@@ -222,7 +232,7 @@ class _testViewState extends State<testView> {
   }
 
 
-  void _showDialog(LatLng location) {
+  void _showDialog(LatLng location) async{
     String urlPop = "";
     for (int i = 0; i <= coordinates.length; i++) {
       if (i < coordinates.length) {
@@ -232,111 +242,248 @@ class _testViewState extends State<testView> {
         }
       }
     }
-    // print("urlPop$urlPop");
-    getJsonString(urlPop);
 
+    // bool isLoading = false;
 
-
-    if(dataList.isEmpty){
-      showDialog(
-        context: context,
-        barrierDismissible: false, // Dialog cannot be dismissed by tapping outside
-        builder: (BuildContext context) {
-          return Dialog(
-            child: Container(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(), // Loading indicator
-                  SizedBox(height: 16.0),
-                  Text('Loading...'), // Loading text
-                ],
-              ),
+    _customInfoWindowController.addInfoWindow!(
+      Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
             ),
-          );
-        },
-      );
+            padding: const EdgeInsets.all(16.0),
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(), // Loading indicator
+                SizedBox(height: 16.0),
+                Text('Loading...'), // Loading text
+              ],
+            ),
+          ),
+          Triangle.isosceles(
+            edge: Edge.BOTTOM,
+            child: Container(
+              color: Colors.white,
+              width: 20.0,
+              height: 10.0,
+            ),
+          ),
+        ],
+      ),
+      location,
+    );
 
-      // Simulate a delay of 2 seconds
-      Future.delayed(Duration(seconds: 2), () {
-        // Close the dialog after the delay
-        Navigator.of(context).pop();
-      });
-    }
-    else{
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-            Map<String, dynamic> jsonData = dataList[0];
-            PopupItems items = PopupItems.fromJson(jsonData);
-            return AlertDialog(
-                content:
-                Wrap(
-                  children: [
-                    Row(
+
+    try {
+      final response = await http.get(Uri.parse(urlPop));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonData = json.decode(response.body);
+        dataList.add(jsonData);
+        Map<String, dynamic> jsonData1 = dataList[0];
+        PopupItems items = PopupItems.fromJson(jsonData1);
+        _customInfoWindowController.addInfoWindow!(
+          Column(
+            children:[
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child:
+              Wrap(
+                children: [
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => popupDetailedScreen(items.singleItem!.urlDetails!)));
+                    },
+                    child:Row(
                       children: [
                         Container(
+                          margin:const EdgeInsets.only(left: 20,top: 20,bottom: 20),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                width: 250,
+                                width: 220,
                                 child:
-                                  Text(items.singleItem!.bezeichnung!,
-                                    style: const TextStyle(
-                                        overflow: TextOverflow.fade,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20),
-                                  ),
+                                Text(items.singleItem!.bezeichnung!,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),maxLines: 2,overflow: TextOverflow.ellipsis,
+
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(top: 10),
+                                width: 220,
+                                child:
+                                Text(items.singleItem!.strasse!,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 13),maxLines: 1,overflow: TextOverflow.ellipsis,
+
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(top: 10),
+                                width: 220,
+                                child:
+                                Text("${items.singleItem!.plz!} ${items.singleItem!.ort!}",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 13),maxLines: 1,
+                                ),
                               ),
 
-                              Text(items.singleItem!.ort!,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 20),
-                              ),
-
-                              Text(items.singleItem!.strasse!,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 20),
-                              ),
-
-
-                      ],
+                            ],
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 18.0,
                           width: 18.0,
-                          child: IconButton(
-                            icon: const Icon(Icons.arrow_back_ios,color: Colors.black,),
-                            onPressed: () {
-                              // Handle back arrow tap
-                            },
-                          ),
+                          child:
+                             Icon(Icons.arrow_back_ios,color: Colors.black,),
+                            // onPressed: () {
+                            //   // Navigator.of(context).push(MaterialPageRoute(builder: (context) => popupDetailedScreen()));
+                            // },
+
                         )
                       ],
                     ),
-                    Container(
-                      margin: const EdgeInsets.all(10),
-                      width: double.infinity,
-                      child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            dataList.clear();
-                          },
-                          child: Text("Close")),
-                    ),
+                  ),
+                ],
+              ),
+            ),
+              Triangle.isosceles(
+                edge: Edge.BOTTOM,
+                child: Container(
+                  color: Colors.white,
+                  width: 20.0,
+                  height: 10.0,
+                ),
+              ),
+            ],
 
-                  ],
-                )
-            );
-        },
-      );
+          ),
+
+          location,
+        );
+
+
+      } else {
+        throw Exception('Failed to load data: ${response.reasonPhrase}');
+      }
+    } catch (error) {
+      print('Error: $error');
     }
+
+
+
+
+    // if(dataList.isEmpty){
+    //   showDialog(
+    //     context: context,
+    //     barrierDismissible: false, // Dialog cannot be dismissed by tapping outside
+    //     builder: (BuildContext context) {
+    //       return Dialog(
+    //         child: Container(
+    //           padding: EdgeInsets.all(16.0),
+    //           child: Column(
+    //             mainAxisSize: MainAxisSize.min,
+    //             children: [
+    //               CircularProgressIndicator(), // Loading indicator
+    //               SizedBox(height: 16.0),
+    //               Text('Loading...'), // Loading text
+    //             ],
+    //           ),
+    //         ),
+    //       );
+    //     },
+    //   );
+    //
+    //   // Simulate a delay of 2 seconds
+    //   Future.delayed(Duration(seconds: 2), () {
+    //     // Close the dialog after the delay
+    //     Navigator.of(context).pop();
+    //   });
+    // }
+    // else{
+    //   showDialog(
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //         Map<String, dynamic> jsonData = dataList[0];
+    //         PopupItems items = PopupItems.fromJson(jsonData);
+    //         return AlertDialog(
+    //             content:
+    //             Wrap(
+    //               children: [
+    //                 Row(
+    //                   children: [
+    //                     Container(
+    //                       child: Column(
+    //                         mainAxisAlignment: MainAxisAlignment.center,
+    //                         crossAxisAlignment: CrossAxisAlignment.start,
+    //                         children: [
+    //                           Container(
+    //                             width: 250,
+    //                             child:
+    //                               Text(items.singleItem!.bezeichnung!,
+    //                                 style: const TextStyle(
+    //                                     overflow: TextOverflow.fade,
+    //                                     fontWeight: FontWeight.bold,
+    //                                     fontSize: 20),
+    //                               ),
+    //                           ),
+    //
+    //                           Text(items.singleItem!.ort!,
+    //                             style: TextStyle(
+    //                                 fontWeight: FontWeight.normal,
+    //                                 fontSize: 20),
+    //                           ),
+    //
+    //                           Text(items.singleItem!.strasse!,
+    //                             style: TextStyle(
+    //                                 fontWeight: FontWeight.normal,
+    //                                 fontSize: 20),
+    //                           ),
+    //
+    //
+    //                   ],
+    //                       ),
+    //                     ),
+    //                     SizedBox(
+    //                       height: 18.0,
+    //                       width: 18.0,
+    //                       child: IconButton(
+    //                         icon: const Icon(Icons.arrow_back_ios,color: Colors.black,),
+    //                         onPressed: () {
+    //                           // Handle back arrow tap
+    //                         },
+    //                       ),
+    //                     )
+    //                   ],
+    //                 ),
+    //                 Container(
+    //                   margin: const EdgeInsets.all(10),
+    //                   width: double.infinity,
+    //                   child: ElevatedButton(
+    //                       onPressed: () {
+    //                         Navigator.pop(context);
+    //                         dataList.clear();
+    //                       },
+    //                       child: Text("Close")),
+    //                 ),
+    //
+    //               ],
+    //             )
+    //         );
+    //     },
+    //   );
+    // }
 
 
   }
@@ -351,26 +498,18 @@ class _testViewState extends State<testView> {
     retrieveList();
     loadStringValue(KATEGORY_PREFS);
     loadBooleanValue();
-    // getJsonString("https://www.empfingen.de/app-v3-nativ?action=getFirmaPopUp&singleItemId=489&cHash=6845102aa506a1b1a471fc74c1bfb5ad");
   }
   // ========================== Popup Code ==========================
   List<Map<String, dynamic>> dataList = [];
 
 
   getJsonString(String apiUrl) async{
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonData = json.decode(response.body);
-        dataList.add(jsonData);
-      } else {
-        throw Exception('Failed to load data: ${response.reasonPhrase}');
-      }
-    } catch (error) {
-      print('Error: $error');
-    }
+
   }
 
+
+  CustomInfoWindowController _customInfoWindowController =
+  CustomInfoWindowController();
 
 
   @override
@@ -565,6 +704,7 @@ class _testViewState extends State<testView> {
                                   // ),
                                   onTap: (){
                                       _showDialog(coordinates[i]);
+
                                   }
                                 ),
                               );
@@ -599,26 +739,61 @@ class _testViewState extends State<testView> {
                                                 duration: Duration(milliseconds: 500),
                                                 width: double.infinity,
                                                 height: _height,
-                                                child:GoogleMap( //Map widget from google_maps_flutter package
-                                                    zoomGesturesEnabled: true, //enable Zoom in, out on map
-                                                    tiltGesturesEnabled: true,
-                                                    mapType: currentMapType,
-                                                    myLocationEnabled: true, // Enable the "My Location" button
-                                                    scrollGesturesEnabled: true,
-                                                    gestureRecognizers:
-                                                    <Factory<OneSequenceGestureRecognizer>>{
-                                                      Factory<OneSequenceGestureRecognizer>(
-                                                            () => EagerGestureRecognizer(),
-                                                      ),
-                                                    },
-                                                    initialCameraPosition: createInitialCameraPosition(),
-                                                    // initialCameraPosition: _kGoogle,
-                                                    markers: markers,
-                                                    onMapCreated: (controller) {
-                                                      mapController = controller;
-                                                      _controller.complete(controller);
-                                                    }
+                                                child:
+
+                                                Stack(
+                                                  children: <Widget>[
+                                                    GoogleMap( //Map widget from google_maps_flutter package
+                                                        zoomGesturesEnabled: true, //enable Zoom in, out on map
+                                                        tiltGesturesEnabled: true,
+                                                        mapType: currentMapType,
+                                                        myLocationEnabled: true, // Enable the "My Location" button
+                                                        scrollGesturesEnabled: true,
+                                                        gestureRecognizers:
+                                                        <Factory<OneSequenceGestureRecognizer>>{
+                                                          Factory<OneSequenceGestureRecognizer>(
+                                                                () => EagerGestureRecognizer(),
+                                                          ),
+                                                        },
+                                                        onTap: (position) {
+                                                          _customInfoWindowController
+                                                              .hideInfoWindow!();
+                                                          dataList.clear();
+                                                        },
+                                                        initialCameraPosition: createInitialCameraPosition(),
+                                                        // initialCameraPosition: _kGoogle,
+                                                        markers: markers,
+                                                        onMapCreated: (controller) {
+                                                          mapController = controller;
+                                                          _controller.complete(controller);
+                                                          _customInfoWindowController
+                                                              .googleMapController =
+                                                              controller;
+                                                        },
+                                                      onCameraMove: (position) {
+                                                          // setState(() {
+                                                          //   _manager.onCameraMove;
+                                                          // });
+                                                          _customInfoWindowController
+                                                          .onCameraMove!();
+                                                      },
+                                                      onCameraIdle: () {
+                                                          // setState(() {
+                                                          //   _manager.updateMap();
+                                                          // });
+                                                      },
+                                                    ),
+                                                    CustomInfoWindow(
+                                                      controller:
+                                                      _customInfoWindowController,
+                                                      height: MediaQuery.of(context).size.height *0.19,
+                                                      // height: MediaQuery.of(context).size.height *0.22,
+                                                      width: 270,
+                                                      offset: 20,
+                                                    ),
+                                                  ],
                                                 ),
+
                                               ),
                                             ),
                                           ),
@@ -1397,4 +1572,5 @@ class _testViewState extends State<testView> {
         .then((value) => _reload(value));
   }
 }
+
 
