@@ -13,14 +13,21 @@ class MapMarker extends Clusterable {
   final String id;
   final LatLng position;
   BitmapDescriptor? icon;
-  final void onTap;
-  final void onTap2;
+  // final void onTap;
+  // final void onTap2;
+  Function(LatLng)? onTapCallbackMarker;
+  Function(LatLng)? onTapCallbackCluster;
+
+
+
 
   MapMarker({
     required this.id,
     required this.position,
-    this.onTap,
-    this.onTap2,
+    // this.onTap,
+    // this.onTap2,
+    this.onTapCallbackMarker,
+    this.onTapCallbackCluster,
     this.icon,
     isCluster = false,
     clusterId,
@@ -43,10 +50,17 @@ class MapMarker extends Clusterable {
       position.longitude,
     ),
     icon: icon!,
-    onTap: isCluster!? (){
-      onTap;
-    }: (){
-      onTap2;
-    },
+    onTap: () {isCluster! ? onTapCallbackCluster!(position) : onTapCallbackMarker!(position);}
+
+
+      // if(isCluster!){
+      //   onTapCallbackCluster!(position);
+      // }
+      // else{
+      //   onTapCallbackMarker!(position);
+      // }
+    // },
+    // onTap: (){
+
   );
 }

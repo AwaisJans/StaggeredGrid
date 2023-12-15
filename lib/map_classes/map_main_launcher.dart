@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_project/map_classes/main/circleScreen.dart';
 
+import 'main/clusterScreenApproach1.dart';
 import 'main/clusterScreenApproach2.dart';
 import 'main/clusterScreenApproach3.dart';
 import 'main/polygonScreen.dart';

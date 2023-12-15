@@ -13,7 +13,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_project/fermin_popup_next_page.dart';
+import 'package:test_project/pagination/fermin/info_window/edge.dart';
+import 'package:test_project/pagination/fermin/info_window/triangle.dart';
+import 'package:test_project/pagination/fermin/main/fermin_popup_next_page.dart';
 import 'package:test_project/pagination/configs/app_config.dart';
 import 'package:test_project/pagination/configs/default_config.dart';
 import 'package:test_project/pagination/extensions/color_hex.dart';
@@ -26,8 +28,6 @@ import 'package:test_project/pagination/news/main/news_details_screen.dart';
 import 'package:test_project/pagination/news/models/filter_model/filter_items.dart';
 import 'package:test_project/pagination/news/news_items.dart';
 
-import 'map_classes/main/info_window/edge.dart';
-import 'map_classes/main/info_window/triangle.dart';
 
 void main() {
   runApp(MaterialApp(home: testView()));
@@ -280,6 +280,7 @@ class _testViewState extends State<testView> {
     try {
       final response = await http.get(Uri.parse(urlPop));
       if (response.statusCode == 200) {
+        dataList.clear();
         final Map<String, dynamic> jsonData = json.decode(response.body);
         dataList.add(jsonData);
         Map<String, dynamic> jsonData1 = dataList[0];
@@ -758,7 +759,7 @@ class _testViewState extends State<testView> {
                                                         onTap: (position) {
                                                           _customInfoWindowController
                                                               .hideInfoWindow!();
-                                                          dataList.clear();
+                                                          // dataList.clear();
                                                         },
                                                         initialCameraPosition: createInitialCameraPosition(),
                                                         // initialCameraPosition: _kGoogle,

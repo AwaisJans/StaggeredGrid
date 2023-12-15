@@ -43,7 +43,13 @@ import 'cluster_utils/map_marker.dart';
 //   // // Method to fetch markers
 //   // Future<FerminMapItems> fetchAlbum() async {
 //   //
-//   //   String urlMap = "https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers";
+//   // String
+//   // urlMap = "https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers";
+//   // urlMap ="https://www.empfingen.de/index.php?id=265&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers";
+//   // urlMap ="https://www.heroldstatt.de/index.php?id=374&baseColor=005398&baseFontSize=14&action=getFirmaMarkers";
+//   // urlMap ="https://www.kupferzell.de/index.php?id=327&baseColor=2727278&baseFontSize=14&action=getFirmaMarkers";
+//   // urlMap ="https://www.vellberg.de/index.php?id=483&baseColor=D00218&baseFontSize=15&action=getFirmaMarkers";
+//   // urlMap ="https://www.mainhardt.de/index.php?id=521&baseColor=D00218&baseFontSize=15&action=getFirmaMarkers";
 //   //   final response = await http.get(Uri.parse(urlMap));
 //   //
 //   //
@@ -165,6 +171,15 @@ import 'cluster_utils/map_marker.dart';
 //           icon: markerImage,
 //           // onTap: {markerTap()},
 //           // onTap2: {clusterTap(markerLocation)},
+//           onTapCallbackMarker: (LatLng position) {
+//             markerTap();
+//             // Your onTap logic here
+//           },
+//           onTapCallbackCluster: (LatLng position) {
+//             // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("cluster")));
+//             clusterTap(markerLocation);
+//             // Your onTap logic here
+//           },
 //         ),
 //       );
 //     }
@@ -631,8 +646,8 @@ import 'cluster_utils/map_marker.dart';
 //   }
 //
 // }
-
-
+//
+//
 
 
 
