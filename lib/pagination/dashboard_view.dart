@@ -58,8 +58,19 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
+
+
+
+
     getCharactersfromApi();
   }
+
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {

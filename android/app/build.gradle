@@ -1,3 +1,4 @@
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -60,10 +61,28 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+    }
 }
 
 flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    implementation 'com.google.maps.android:android-maps-utils:2.3.0'
+    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.squareup.picasso:picasso:2.8'
+
+
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+
+
+
+    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}
+

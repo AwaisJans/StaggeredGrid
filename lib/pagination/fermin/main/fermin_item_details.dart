@@ -477,32 +477,19 @@ class _ferminItemDetailsState extends State<ferminItemDetails> {
 
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            GalleryExampleItemThumbnail(
-                              galleryExampleItem: galleryItems[0],
-                              onTap: () {
-                                open(context, 0);
-                              },
+                      children: <Widget>[Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          ...List.generate(
+                            galleryItems.length,
+                                (index) => GalleryExampleItemThumbnail(
+                              galleryExampleItem: galleryItems[index],
+                              onTap: () => open(context, index),
                             ),
-                            GalleryExampleItemThumbnail(
-                              galleryExampleItem: galleryItems[1],
-                              onTap: () {
-                                open(context, 1);
-                              },
-                            ),
-                            GalleryExampleItemThumbnail(
-                              galleryExampleItem: galleryItems[2],
-                              onTap: () {
-                                open(context, 2);
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),],
+                    )
                   ),
 
 
@@ -665,7 +652,6 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper> {
           height: MediaQuery.of(context).size.height,
         ),
         child: Stack(
-          alignment: Alignment.bottomRight,
           children: <Widget>[
             PhotoViewGallery.builder(
               scrollPhysics: const BouncingScrollPhysics(),
@@ -677,17 +663,34 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper> {
               onPageChanged: onPageChanged,
               scrollDirection: widget.scrollDirection,
             ),
-            Container(
-              padding: const EdgeInsets.all(20.0),
-              child: Text(
-                "Image ${currentIndex + 1}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 17.0,
-                  decoration: null,
+            Row(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(left: 30,top: 30),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios),
+                    color: Colors.white,
+                    onPressed: () {
+                      Navigator.of(context)
+                          .pop();
+                    },
+                  ),
                 ),
-              ),
+                Container(
+                  padding: const EdgeInsets.all(20.0),
+                  margin: EdgeInsets.only(left: 30,top: 30),
+                  child: Text(
+                    "Image ${currentIndex + 1}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 17.0,
+                      decoration: null,
+                    ),
+                  ),
+                )
+              ],
             )
+
           ],
         ),
       ),

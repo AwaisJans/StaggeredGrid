@@ -1,9 +1,12 @@
+import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:test_project/map_classes/main/circleScreen.dart';
 
 import 'main/clusterScreenApproach1.dart';
 import 'main/clusterScreenApproach2.dart';
 import 'main/clusterScreenApproach3.dart';
+import 'main/clusterScreenApproach4.dart';
 import 'main/polygonScreen.dart';
 
 void main() {
@@ -21,8 +24,32 @@ class ButtonsMainScreen extends StatefulWidget {
 
 class _ButtonsMainScreenState extends State<ButtonsMainScreen> {
 
+  static const platform = MethodChannel("com.valar.morghulis");
+
+  _ButtonsMainScreenState() {
+    platform.setMethodCallHandler(_methodHandler);
+  }
+
+
+  Future<Null> _didTapButton() async {
+    var result = await platform.invokeMethod("method_name");
+  }
+
+  Future<dynamic> _methodHandler(MethodCall call) async {
+    switch (call.method) {
+      case "message":
+        debugPrint(call.arguments);
+        return new Future.value("");
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
+
+
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Map Example'),
@@ -40,6 +67,12 @@ class _ButtonsMainScreenState extends State<ButtonsMainScreen> {
                 Column(
                   children: [
 
+
+                    Text(
+                      "_batteryLevel"
+                    ),
+
+
                     Container(
                       margin: const EdgeInsets.all(8.0),
                       width: 280,
@@ -47,12 +80,7 @@ class _ButtonsMainScreenState extends State<ButtonsMainScreen> {
                       color: Colors.black,
                       child:ElevatedButton(
 
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => PolygonMapScreen()),
-                          );
-                        },
+                        onPressed: _didTapButton,
                         style: ElevatedButton.styleFrom(
                           primary: Colors.black, // Change the background color here
                         ),
