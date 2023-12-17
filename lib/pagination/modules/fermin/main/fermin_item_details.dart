@@ -2,11 +2,13 @@
 
 
 
+import 'dart:math';
+
 import 'package:contacts_service/contacts_service.dart';
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:insta_image_viewer/insta_image_viewer.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -37,6 +39,9 @@ class _ferminItemDetailsState extends State<ferminItemDetails> {
     'Cleaning',
     'Painting',
   ];
+
+
+
 
   WebViewController controller = WebViewController();
 
@@ -171,6 +176,7 @@ class _ferminItemDetailsState extends State<ferminItemDetails> {
     return heightWebView;
   }
 
+  int position = 0;
 
 
 
@@ -461,35 +467,41 @@ class _ferminItemDetailsState extends State<ferminItemDetails> {
                   child:
                   GestureDetector(
                     onTap: () {
+                      open(context, 0);
                     },
-                    child:
-                    // SizedBox(
-                    //   width: 100,
-                    //   height: 140,
-                    //   child: InstaImageViewer(
-                    //     child: Image(
-                    //       image: Image.network("https://www.welzheim.de//fileadmin//user_upload//firmenliste_4bb6d5dbd782068b8d5f9aa839ad91c9.png")
-                    //           .image,
-                    //     ),
-                    //   ),
-                    // ),
-
-
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          ...List.generate(
-                            galleryItems.length,
-                                (index) => GalleryExampleItemThumbnail(
-                              galleryExampleItem: galleryItems[index],
-                              onTap: () => open(context, index),
-                            ),
+                    child: Column(
+                      children: [
+                        Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                          ),                      constraints: BoxConstraints.expand(
+                            height: 300,
                           ),
-                        ],
-                      ),],
-                    )
+                          child: Stack(
+                            children: <Widget>[
+                              PhotoViewGallery.builder(
+                                scrollPhysics: const BouncingScrollPhysics(),
+                                builder: (BuildContext context, int index) {
+                                  String item = galleryItems[index].resource;
+                                  return PhotoViewGalleryPageOptions(
+                                    imageProvider: AssetImage(item),
+                                    initialScale: PhotoViewComputedScale.contained,
+                                    minScale: PhotoViewComputedScale.contained * (0.5 + index / 10),
+                                    maxScale: PhotoViewComputedScale.covered * 4.1,
+                                    heroAttributes: PhotoViewHeroAttributes(tag: index),
+                                  );
+                                },
+                                backgroundDecoration: const BoxDecoration(
+                                  color: Colors.white,
+                                ),
+                                itemCount: galleryItems.length,
+                                pageController: PageController(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
 
 
@@ -532,6 +544,15 @@ class _ferminItemDetailsState extends State<ferminItemDetails> {
     );
   }
 
+
+  void _updatePosition(int posit) {
+    setState(() => position = _validPosition(posit));
+  }
+  int _validPosition(int position) {
+    if (position >= galleryItems.length) return 0;
+    if (position < 0) return galleryItems.length - 1;
+    return position;
+  }
 }
 
 
@@ -574,6 +595,14 @@ class GalleryExampleItemThumbnail extends StatelessWidget {
   }
 }
 
+
+
+
+
+
+
+
+
 List<GalleryExampleItem> galleryItems = <GalleryExampleItem>[
   GalleryExampleItem(
     id: "tag1",
@@ -588,8 +617,6 @@ List<GalleryExampleItem> galleryItems = <GalleryExampleItem>[
     resource: "assets/images/flower-3.jpeg",
   ),
 ];
-
-
 
 void open(BuildContext context, final int index) {
   Navigator.push(

@@ -16,11 +16,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:insta_image_viewer/insta_image_viewer.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
-import '../../configs/app_config.dart';
+import '../../../configs/app_config.dart';
 import '../news_items.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_platform_interface/webview_flutter_platform_interface.dart';
@@ -111,6 +110,23 @@ class _CustomLayoutWebViewState extends State<CustomLayoutWebView> {
                                     document.images[j].style.height = 'auto';
                                   }
                               """;
+
+
+  String imagesList = """
+                                (function getImages(){
+                                  var objs = window.document.getElementsByTagName('img');
+                                  var imgScr = '+';
+                                  for(var i=0;i<objs.length;i++){
+                                  imgScr = imgScr + objs[i].src + '+';
+                                  };
+                                  return imgScr;
+                                })();
+                              """;
+
+
+
+  String list = "";
+  List<String>? imgList;
   @override
   void initState() {
 
@@ -137,16 +153,15 @@ class _CustomLayoutWebViewState extends State<CustomLayoutWebView> {
         if (request.url.contains('showpic')) {
           debugPrint('blocking navigation to ${request.url}');
 
-          SizedBox(
-            width: 100,
-            height: 140,
-            child: InstaImageViewer(
-              child: Image(
-                image: Image.network(request.url)
-                    .image,
-              ),
-            ),
-          );
+
+
+          Navigator.of(context)
+              .push(MaterialPageRoute(
+              builder: (context) => MyImageView(imgList:imgList)));
+
+
+
+
 
           return NavigationDecision.prevent;
         }
@@ -167,15 +182,15 @@ class _CustomLayoutWebViewState extends State<CustomLayoutWebView> {
         await controller.runJavaScript(metaScript);
         await controller.runJavaScript(fontFamily);
         await controller.runJavaScript(imagesSize);
-        await controller.runJavaScript("""
-        
-        """);
 
 
-
-
-        // String result = {await controller
-        //     .runJavaScriptReturningResult(script)}.toString();
+        onImageList(context).then((value) => setState((){
+          list = value as String;
+          // Remove leading and trailing '+' characters and split the string
+          imgList = list.substring(1, list.length - 1).split('+');
+          // Print the resulting list
+          print('newListimg ${imgList.toString()}');
+        }));
 
 
         _onHeightWebView(context).then((value) => setState((){
@@ -191,6 +206,34 @@ class _CustomLayoutWebViewState extends State<CustomLayoutWebView> {
 
 
   }
+
+
+
+
+  Future<String> onImageList(BuildContext context) async {
+    // Inject JavaScript code to calculate the content height
+    String script = """
+                    
+              var objs = window.document.getElementsByTagName('img');
+              var imgScr = '';
+              for(var i=0; i<objs.length; i++){
+                imgScr = imgScr + objs[i].src + '+';
+              };
+              imgScr;
+                              """;
+
+    final String imagesList = await controller
+        .runJavaScriptReturningResult(script) as String;
+
+    setState(() {
+      list = imagesList;
+
+    });
+
+    return imagesList;
+  }
+
+
 
   Future<int> _onHeightWebView(BuildContext context) async {
     // Inject JavaScript code to calculate the content height

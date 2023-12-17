@@ -7,15 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_project/pagination/dashboard_items.dart';
-import 'package:test_project/pagination/news/news_items.dart';
+import 'package:test_project/pagination/modules/dashboard/model/dashboard_items.dart';
+import 'package:test_project/pagination/modules/news/news_items.dart';
 
-import '../../configs/app_config.dart';
 
 import 'package:http/http.dart' as http;
 
-import '../../configs/default_config.dart';
-import '../../extensions/color_hex.dart';
+import '../../../configs/app_config.dart';
+import '../../../configs/default_config.dart';
+import '../../../extensions/color_hex.dart';
 import '../models/filter_model/filter_items.dart';
 import 'news_details_screen.dart';
 
@@ -49,9 +49,6 @@ class _LoadMoreNewsState extends State<LoadMoreOnScrollListView> {
   _LoadMoreNewsState(this.dashboardSingleFetchItem);
 
   ScrollController scrollController = ScrollController();
-
-
-
 
   bool isLoadingMore = false;
   int _limit = 10;
@@ -239,12 +236,7 @@ class _LoadMoreNewsState extends State<LoadMoreOnScrollListView> {
   bool allFalse = false;
   bool allTextFalse = false;
 
-
   String PREF_KEY_VOLT_TEXT = "voltText";
-
-
-
-
 
   @override
   Widget build(BuildContext context) {

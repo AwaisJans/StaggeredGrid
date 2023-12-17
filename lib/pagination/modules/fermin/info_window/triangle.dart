@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:test_project/pagination/fermin/info_window/triangle_clipper.dart';
+import 'package:test_project/pagination/modules/fermin/info_window/triangle_clipper.dart';
 
 import 'clip_shadow.dart';
 import 'edge.dart';

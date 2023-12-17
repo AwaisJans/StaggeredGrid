@@ -14,23 +14,23 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_project/pagination/fermin/main/fermin_popup_next_page.dart';
+import 'package:test_project/pagination/modules/fermin/main/fermin_popup_next_page.dart';
 import 'package:test_project/pagination/configs/app_config.dart';
 import 'package:test_project/pagination/configs/default_config.dart';
 import 'package:test_project/pagination/extensions/color_hex.dart';
-import 'package:test_project/pagination/fermin/main/fermin_item_details.dart';
-import 'package:test_project/pagination/fermin/model/ferminListViewModel/fermin_items.dart';
-import 'package:test_project/pagination/fermin/model/fermin_map_model/fermin_map_items.dart';
-import 'package:test_project/pagination/fermin/model/marker_popup_model/marker_popup_model.dart';
-import 'package:test_project/pagination/news/main/newsScreen.dart';
-import 'package:test_project/pagination/news/main/news_details_screen.dart';
-import 'package:test_project/pagination/news/models/filter_model/filter_items.dart';
-import 'package:test_project/pagination/news/news_items.dart';
+import 'package:test_project/pagination/modules/fermin/main/fermin_item_details.dart';
+import 'package:test_project/pagination/modules/fermin/model/ferminListViewModel/fermin_items.dart';
+import 'package:test_project/pagination/modules/fermin/model/fermin_map_model/fermin_map_items.dart';
+import 'package:test_project/pagination/modules/fermin/model/marker_popup_model/marker_popup_model.dart';
+import 'package:test_project/pagination/modules/news/main/newsScreen.dart';
+import 'package:test_project/pagination/modules/news/main/news_details_screen.dart';
+import 'package:test_project/pagination/modules/news/models/filter_model/filter_items.dart';
 
-import 'package:test_project/pagination/fermin/info_window/edge.dart';
-import 'package:test_project/pagination/fermin/info_window/triangle.dart';
+import 'package:test_project/pagination/modules/fermin/info_window/edge.dart';
+import 'package:test_project/pagination/modules/fermin/info_window/triangle.dart';
 
-import '../../dashboard_items.dart';
+import '../../dashboard/model/dashboard_items.dart';
+
 
 class ferminListView extends StatefulWidget { /// stateful widget
 
@@ -238,17 +238,11 @@ class _ferminListViewState extends State<ferminListView> {  /// state widget
   }
 
 
-  void _showDialog(LatLng location) async{
-    String urlPop = "";
-    for (int i = 0; i <= coordinates.length; i++) {
-      if (i < coordinates.length) {
-        if (location == coordinates[i]) {
-          urlPop = urlsPop[i];
+  void _showDialog(int index) async{
+    LatLng location = coordinates[index];
+    String urlPop = urlsPop[index];
 
-        }
-      }
-    }
-
+    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(urlPop.toString())));
     // bool isLoading = false;
 
     _customInfoWindowController.addInfoWindow!(
@@ -279,7 +273,7 @@ class _ferminListViewState extends State<ferminListView> {  /// state widget
           ),
         ],
       ),
-      location,
+      location!,
     );
 
 
@@ -379,120 +373,12 @@ class _ferminListViewState extends State<ferminListView> {  /// state widget
 
           location,
         );
-
-
       } else {
-        throw Exception('Failed to load data: ${response.reasonPhrase}');
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("failed to load data")));
       }
     } catch (error) {
-      print('Error: $error');
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Internet Issue")));
     }
-
-
-
-
-    // if(dataList.isEmpty){
-    //   showDialog(
-    //     context: context,
-    //     barrierDismissible: false, // Dialog cannot be dismissed by tapping outside
-    //     builder: (BuildContext context) {
-    //       return Dialog(
-    //         child: Container(
-    //           padding: EdgeInsets.all(16.0),
-    //           child: Column(
-    //             mainAxisSize: MainAxisSize.min,
-    //             children: [
-    //               CircularProgressIndicator(), // Loading indicator
-    //               SizedBox(height: 16.0),
-    //               Text('Loading...'), // Loading text
-    //             ],
-    //           ),
-    //         ),
-    //       );
-    //     },
-    //   );
-    //
-    //   // Simulate a delay of 2 seconds
-    //   Future.delayed(Duration(seconds: 2), () {
-    //     // Close the dialog after the delay
-    //     Navigator.of(context).pop();
-    //   });
-    // }
-    // else{
-    //   showDialog(
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //         Map<String, dynamic> jsonData = dataList[0];
-    //         PopupItems items = PopupItems.fromJson(jsonData);
-    //         return AlertDialog(
-    //             content:
-    //             Wrap(
-    //               children: [
-    //                 Row(
-    //                   children: [
-    //                     Container(
-    //                       child: Column(
-    //                         mainAxisAlignment: MainAxisAlignment.center,
-    //                         crossAxisAlignment: CrossAxisAlignment.start,
-    //                         children: [
-    //                           Container(
-    //                             width: 250,
-    //                             child:
-    //                               Text(items.singleItem!.bezeichnung!,
-    //                                 style: const TextStyle(
-    //                                     overflow: TextOverflow.fade,
-    //                                     fontWeight: FontWeight.bold,
-    //                                     fontSize: 20),
-    //                               ),
-    //                           ),
-    //
-    //                           Text(items.singleItem!.ort!,
-    //                             style: TextStyle(
-    //                                 fontWeight: FontWeight.normal,
-    //                                 fontSize: 20),
-    //                           ),
-    //
-    //                           Text(items.singleItem!.strasse!,
-    //                             style: TextStyle(
-    //                                 fontWeight: FontWeight.normal,
-    //                                 fontSize: 20),
-    //                           ),
-    //
-    //
-    //                   ],
-    //                       ),
-    //                     ),
-    //                     SizedBox(
-    //                       height: 18.0,
-    //                       width: 18.0,
-    //                       child: IconButton(
-    //                         icon: const Icon(Icons.arrow_back_ios,color: Colors.black,),
-    //                         onPressed: () {
-    //                           // Handle back arrow tap
-    //                         },
-    //                       ),
-    //                     )
-    //                   ],
-    //                 ),
-    //                 Container(
-    //                   margin: const EdgeInsets.all(10),
-    //                   width: double.infinity,
-    //                   child: ElevatedButton(
-    //                       onPressed: () {
-    //                         Navigator.pop(context);
-    //                         dataList.clear();
-    //                       },
-    //                       child: Text("Close")),
-    //                 ),
-    //
-    //               ],
-    //             )
-    //         );
-    //     },
-    //   );
-    // }
-
-
   }
 
   @override
@@ -513,8 +399,6 @@ class _ferminListViewState extends State<ferminListView> {  /// state widget
   getJsonString(String apiUrl) async{
 
   }
-
-
   CustomInfoWindowController _customInfoWindowController =
   CustomInfoWindowController();
 
@@ -555,8 +439,6 @@ class _ferminListViewState extends State<ferminListView> {  /// state widget
 
             Navigator.of(context)
                 .pop();
-
-
           },
         ),
 
@@ -585,15 +467,7 @@ class _ferminListViewState extends State<ferminListView> {  /// state widget
             ),
           )
         ],
-
-
-
-
         /// Search Button
-
-
-
-
 
       ),
       backgroundColor: Colors.grey,
@@ -697,30 +571,24 @@ class _ferminListViewState extends State<ferminListView> {  /// state widget
 
                               print("urlsPop$urlsPop");
 
-
                               for (int i = 0; i < coordinates.length; i++) {
                                 markers.add(
                                   Marker(
-                                      markerId: MarkerId("marker_$i"),
+                                      // markerId: markerId,
+                                      markerId: MarkerId(i.toString()),
                                       position: coordinates[i],
                                       // infoWindow: InfoWindow(
                                       //   title: "Marker $i",
                                       //   snippet: "Coordinates: ${coordinates[i]}",
                                       // ),
                                       onTap: (){
-                                        _showDialog(coordinates[i]);
+                                        // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(i.toString())));
+                                        _showDialog(i);
 
                                       }
                                   ),
                                 );
                               }
-
-
-
-
-
-
-
 
                               return StatefulBuilder(
                                 builder: (BuildContext context, StateSetter setState) {
@@ -792,7 +660,6 @@ class _ferminListViewState extends State<ferminListView> {  /// state widget
                                                         controller:
                                                         _customInfoWindowController,
                                                         height: MediaQuery.of(context).size.height *0.19,
-                                                        // height: MediaQuery.of(context).size.height *0.22,
                                                         width: 270,
                                                         offset: 20,
                                                       ),
@@ -916,15 +783,12 @@ class _ferminListViewState extends State<ferminListView> {  /// state widget
                                                                   setState(() {
                                                                     isFullScreen = !isFullScreen;
                                                                   });
-
-
                                                                   if (isFullScreen){
                                                                     _height = 1000;
                                                                   }
                                                                   else{
                                                                     _height = 400;
                                                                   }
-
                                                                 },
                                                               ),
                                                               ListTile(
@@ -933,21 +797,8 @@ class _ferminListViewState extends State<ferminListView> {  /// state widget
                                                                   color: Color.fromRGBO(6, 43, 105, 1), //
                                                                 ),
                                                                 onTap: () {
-
                                                                   getUserCurrentLocation().then((value) {
-
                                                                     LatLng currentCoordinate = LatLng(value.latitude, value.longitude);
-
-                                                                    // markers.add(
-                                                                    //   Marker(
-                                                                    //     markerId: MarkerId("marker_235"),
-                                                                    //     position: currentCoordinate,
-                                                                    //     infoWindow: InfoWindow(
-                                                                    //       title: "Marker jan",
-                                                                    //       snippet: "Coordinates:$currentCoordinate",
-                                                                    //     ),
-                                                                    //   ),
-                                                                    // );
                                                                     mapController.animateCamera(
                                                                       CameraUpdate.newLatLngZoom(currentCoordinate, 20),
                                                                     );

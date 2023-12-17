@@ -4,10 +4,11 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:test_project/pagination/fermin/main/fermin_item_details.dart';
-import 'package:test_project/pagination/fermin/model/marker_popup_model/marker_popup_details_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+import '../model/marker_popup_model/marker_popup_details_model.dart';
+import 'fermin_item_details.dart';
 
 class popupDetailedScreen extends StatefulWidget {
   String? urlDetails;

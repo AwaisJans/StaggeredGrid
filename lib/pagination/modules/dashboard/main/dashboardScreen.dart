@@ -7,10 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:test_project/pagination/modules/setting/settingScreen.dart';
 import 'package:weather_icons/weather_icons.dart';
 
-import 'dashboardViews/GridViewUtil.dart';
-import 'dashboard_items.dart';
+import '../model/dashboard_items.dart';
+import 'dashboardGridView.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -59,17 +60,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-
-
-
-
     getCharactersfromApi();
   }
-
-
-
-
-
 
 
   @override
@@ -94,9 +86,10 @@ class _HomePageState extends State<HomePage> {
 
                   child: GestureDetector(
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text("setting"),
-                      ));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SettingScreen()),
+                      );
                     }, // Image tapped
                     child: SvgPicture.asset(
                       'assets/images/setting1.svg',
@@ -114,8 +107,6 @@ class _HomePageState extends State<HomePage> {
                 child: Image.asset(
                     'assets/images/example_a.png'), // Replace with your image path
               ),
-
-
               // show weather text
 
               Container(

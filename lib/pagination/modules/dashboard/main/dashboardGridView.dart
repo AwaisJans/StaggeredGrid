@@ -7,11 +7,12 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
-import 'package:test_project/pagination/dashboard_items.dart';
-import 'package:test_project/pagination/fermin/main/ferminScreen.dart';
-import 'package:test_project/pagination/news/main/newsScreen.dart';
+import 'package:test_project/pagination/modules/dashboard/model/dashboard_items.dart';
 
-import '../configs/app_config.dart';
+import '../../../configs/app_config.dart';
+import '../../fermin/main/ferminScreen.dart';
+import '../../news/main/newsScreen.dart';
+
 
 Future<DashboardItems> fetchAlbum() async {
   final response = await http
@@ -161,4 +162,184 @@ class _MyGridViewState extends State<MyGridView> {
       );
   }
 }
+
+
+class QuiltedPage extends StatelessWidget {
+  const QuiltedPage({
+    Key? key,
+  }) : super(key: key);
+
+  static const pattern = [
+    QuiltedGridTile(2, 2),
+    QuiltedGridTile(4, 2),
+    QuiltedGridTile(2, 2),
+    QuiltedGridTile(2, 4),
+    QuiltedGridTile(2, 2),
+    QuiltedGridTile(2, 2),
+    QuiltedGridTile(2, 4)
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return AppScaffold(
+      title: 'QuiltedTest',
+      child: GridView.custom(
+        gridDelegate: SliverQuiltedGridDelegate(
+          crossAxisCount: 4,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          repeatPattern: QuiltedGridRepeatPattern.same,
+          pattern: pattern,
+        ),
+        childrenDelegate: SliverChildBuilderDelegate(
+              (context, index) => Container(
+            color: Colors.cyanAccent,
+            child: Text("$index"),
+          ),
+          childCount: 14,
+        ),
+      ),
+    );
+  }
+}
+
+
+const _defaultColor = Color(0xFF34568B);
+
+class AppScaffold extends StatelessWidget {
+  const AppScaffold({
+    Key? key,
+    required this.title,
+    this.topPadding = 0,
+    required this.child,
+  }) : super(key: key);
+
+  final String title;
+  final Widget child;
+  final double topPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: Padding(
+        padding: EdgeInsets.only(top: topPadding),
+        child: child,
+      ),
+    );
+  }
+}
+
+class Tile extends StatelessWidget {
+  const Tile({
+    Key? key,
+    required this.index,
+    this.extent,
+    this.backgroundColor,
+    this.bottomSpace,
+  }) : super(key: key);
+
+  final int index;
+  final double? extent;
+  final double? bottomSpace;
+  final Color? backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final child = Container(
+      color: backgroundColor ?? _defaultColor,
+      height: extent,
+      child: Center(
+        child: CircleAvatar(
+          minRadius: 20,
+          maxRadius: 20,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          child: Text('$index', style: const TextStyle(fontSize: 20)),
+        ),
+      ),
+    );
+
+    if (bottomSpace == null) {
+      return child;
+    }
+
+    return Column(
+      children: [
+        Expanded(child: child),
+        Container(
+          height: bottomSpace,
+          color: Colors.green,
+        )
+      ],
+    );
+  }
+}
+
+class ImageTile extends StatelessWidget {
+  const ImageTile({
+    Key? key,
+    required this.index,
+    required this.width,
+    required this.height,
+  }) : super(key: key);
+
+  final int index;
+  final int width;
+  final int height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(
+      'https://picsum.photos/$width/$height?random=$index',
+      width: width.toDouble(),
+      height: height.toDouble(),
+      fit: BoxFit.cover,
+    );
+  }
+}
+
+class InteractiveTile extends StatefulWidget {
+  const InteractiveTile({
+    Key? key,
+    required this.index,
+    this.extent,
+    this.bottomSpace,
+  }) : super(key: key);
+
+  final int index;
+  final double? extent;
+  final double? bottomSpace;
+
+  @override
+  _InteractiveTileState createState() => _InteractiveTileState();
+}
+
+class _InteractiveTileState extends State<InteractiveTile> {
+  Color color = _defaultColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (color == _defaultColor) {
+            color = Colors.red;
+          } else {
+            color = _defaultColor;
+          }
+        });
+      },
+      child: Tile(
+        index: widget.index,
+        extent: widget.extent,
+        backgroundColor: color,
+        bottomSpace: widget.bottomSpace,
+      ),
+    );
+  }
+}
+
 
